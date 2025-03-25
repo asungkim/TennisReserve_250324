@@ -1,6 +1,6 @@
 package com.tennis.reserve.domain.member.entity;
 
-import com.tennis.reserve.domain.base.BaseEntity;
+import com.tennis.reserve.domain.base.BaseTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @Getter
-public class Member extends BaseEntity {
+public class Member extends BaseTime {
 
     @Column(length = 20, nullable = false, unique = true)
     private String username;
