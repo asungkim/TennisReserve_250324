@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/member")
+@RequestMapping("/api/members")
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
@@ -22,7 +22,7 @@ public class MemberController {
         MemberDto memberDto = memberService.createMember(joinReqForm);
 
         return new RsData<>(
-                "200",
+                "200-1",
                 "회원가입에 성공하였습니다.",
                 memberDto
         );
