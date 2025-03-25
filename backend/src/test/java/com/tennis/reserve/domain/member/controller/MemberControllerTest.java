@@ -1,6 +1,5 @@
 package com.tennis.reserve.domain.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennis.reserve.domain.member.service.MemberService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,9 +27,6 @@ class MemberControllerTest {
 
     @Autowired
     private MockMvc mvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private MemberService memberService;
@@ -158,5 +155,29 @@ class MemberControllerTest {
 
     }
 
+    @Test
+    @DisplayName("회원가입 - 필수 입력 데이터 누락")
+    void join5() throws Exception {
+        String username1 = "";
+        String password1 = "";
+        String nickname1 = "";
+        String email1 = "";
 
+        ResultActions resultActions = joinRequest(username1,password1,nickname1,email1);
+
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(handler().methodName("createMember"))
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(jsonPath("$.code").value("400-1"))
+                .andExpect(jsonPath("$.message", containsString("닉네임은 2~20자 사이여야 합니다.")))
+                .andExpect(jsonPath("$.message", containsString("비밀번호는 8~50자 사이여야 합니다.")))
+                .andExpect(jsonPath("$.message", containsString("비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.")))
+                .andExpect(jsonPath("$.message", containsString("아이디는 4~20자 사이여야 합니다.")))
+                .andExpect(jsonPath("$.message", containsString("아이디는 영문과 숫자만 사용할 수 있습니다.")))
+                .andExpect(jsonPath("$.message", containsString("이메일은 필수 입력값입니다.")));
+
+
+
+    }
 }
