@@ -8,6 +8,7 @@ import com.tennis.reserve.domain.member.dto.response.MemberResBody;
 import com.tennis.reserve.domain.member.entity.Member;
 import com.tennis.reserve.domain.member.repository.MemberRepository;
 import com.tennis.reserve.global.exception.ServiceException;
+import com.tennis.reserve.global.standard.util.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
+    private final Rq rq;
 
     public MemberResBody createMember(JoinReqForm body) {
         // 1. username, nickname, email 중복 체크
@@ -61,10 +63,18 @@ public class MemberService {
         AuthToken authToken = authTokenService.generateAuthToken(member);
 
         // 3. accessToken 쿠키에 저장, refreshToken redis에 저장
+        String accessToken = authToken.accessToken();
+        String refreshToken = authToken.refreshToken();
+
+        rq.addCookie("accessToken", accessToken, 60 * 60);
+
 
 
         // 4. 정보 담아서 리턴
-        return new LoginResBody();
+        return LoginResBody.builder()
+                .item(MemberResBody.fromEntity(member))
+                .accessToken(accessToken)
+                .build();
     }
 
     private Member validateLoginForm(String username, String password) {
