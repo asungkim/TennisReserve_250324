@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
-public class MemberDto {
+public class MemberResBody {
     private Long id;
     private String username;
     private String nickname;
@@ -16,7 +16,7 @@ public class MemberDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
-    public MemberDto(Member member) {
+    public MemberResBody(Member member) {
         this.id = member.getId();
         this.username = member.getUsername();
         this.nickname = member.getNickname();
@@ -25,7 +25,7 @@ public class MemberDto {
         this.modifiedAt = member.getModifiedAt();
     }
 
-    public static MemberDto fromEntity(Member member) {
-        return new MemberDto(member);
+    public static MemberResBody fromEntity(Member member) {
+        return new MemberResBody(member);
     }
 }

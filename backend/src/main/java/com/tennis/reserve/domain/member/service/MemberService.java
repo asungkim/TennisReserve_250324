@@ -1,7 +1,9 @@
 package com.tennis.reserve.domain.member.service;
 
 import com.tennis.reserve.domain.member.dto.request.JoinReqForm;
-import com.tennis.reserve.domain.member.dto.response.MemberDto;
+import com.tennis.reserve.domain.member.dto.request.LoginReqForm;
+import com.tennis.reserve.domain.member.dto.response.LoginResBody;
+import com.tennis.reserve.domain.member.dto.response.MemberResBody;
 import com.tennis.reserve.domain.member.entity.Member;
 import com.tennis.reserve.domain.member.repository.MemberRepository;
 import com.tennis.reserve.global.exception.ServiceException;
@@ -15,8 +17,9 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthTokenService authTokenService;
 
-    public MemberDto createMember(JoinReqForm body) {
+    public MemberResBody createMember(JoinReqForm body) {
         // 1. username, nickname, email 중복 체크
         validateDuplicateMember(body.username(), body.nickname(), body.email());
 
@@ -31,7 +34,7 @@ public class MemberService {
 
         // 3. 레포지토리에 저장 및 DTO 반환
         memberRepository.save(member);
-        return MemberDto.fromEntity(member);
+        return MemberResBody.fromEntity(member);
     }
 
     private void validateDuplicateMember(String username, String nickname, String email) {
@@ -48,4 +51,24 @@ public class MemberService {
         }
     }
 
+    public LoginResBody loginMember(LoginReqForm loginReqForm) {
+        // 1. 로그인 입력 폼 검증
+        validateLoginForm(loginReqForm.username(), loginReqForm.password());
+
+        // 2. 토큰 발급
+
+        // 3. 쿠키 발급
+
+        // 4. 정보 담아서 리턴
+        return new LoginResBody();
+    }
+
+    private void validateLoginForm(String username, String password) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new ServiceException("409-4", "아이디 또는 비밀번호가 올바르지 않습니다."));
+
+        if (!passwordEncoder.matches(member.getPassword(), password)) {
+            throw new ServiceException("409-5", "비밀번호를 올바르게 입력해주세요.");
+        }
+    }
 }
