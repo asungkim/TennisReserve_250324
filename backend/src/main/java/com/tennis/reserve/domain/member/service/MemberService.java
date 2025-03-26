@@ -1,5 +1,6 @@
 package com.tennis.reserve.domain.member.service;
 
+import com.tennis.reserve.domain.member.dto.AuthToken;
 import com.tennis.reserve.domain.member.dto.request.JoinReqForm;
 import com.tennis.reserve.domain.member.dto.request.LoginReqForm;
 import com.tennis.reserve.domain.member.dto.response.LoginResBody;
@@ -51,24 +52,29 @@ public class MemberService {
         }
     }
 
+
     public LoginResBody loginMember(LoginReqForm loginReqForm) {
-        // 1. 로그인 입력 폼 검증
-        validateLoginForm(loginReqForm.username(), loginReqForm.password());
+        // 1. 로그인 입력 폼 검증 후 멤버 리턴
+        Member member = validateLoginForm(loginReqForm.username(), loginReqForm.password());
 
         // 2. 토큰 발급
+        AuthToken authToken = authTokenService.generateAuthToken(member);
 
-        // 3. 쿠키 발급
+        // 3. accessToken 쿠키에 저장, refreshToken redis에 저장
+
 
         // 4. 정보 담아서 리턴
         return new LoginResBody();
     }
 
-    private void validateLoginForm(String username, String password) {
+    private Member validateLoginForm(String username, String password) {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new ServiceException("409-4", "아이디 또는 비밀번호가 올바르지 않습니다."));
 
         if (!passwordEncoder.matches(member.getPassword(), password)) {
             throw new ServiceException("409-5", "비밀번호를 올바르게 입력해주세요.");
         }
+
+        return member;
     }
 }
