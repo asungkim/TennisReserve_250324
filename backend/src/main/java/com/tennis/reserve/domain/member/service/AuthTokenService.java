@@ -28,6 +28,11 @@ public class AuthTokenService {
                 .build();
     }
 
+    public Map<String, Object> getPayload(String token) {
+        return Util.Jwt.getPayload(keyString, token);
+    }
+
+
     private String generateAccessToken(Member member) {
         return Util.Jwt.createToken(
                 keyString,
@@ -43,4 +48,6 @@ public class AuthTokenService {
     private String generateRefreshToken() {
         return UUID.randomUUID().toString();
     }
+
+
 }
