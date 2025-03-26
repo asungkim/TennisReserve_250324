@@ -2,6 +2,12 @@ server:
   port: 8080
 
 spring:
+
+  data:
+    redis:
+      port: 6379
+      host: localhost
+
   jackson:
     serialization:
       fail-on-empty-beans: false

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberService {
 
+    private final MemberRedisService memberRedisService;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
@@ -67,8 +68,7 @@ public class MemberService {
         String refreshToken = authToken.refreshToken();
 
         rq.addCookie("accessToken", accessToken, 60 * 60);
-
-
+        memberRedisService.save(member, refreshToken);
 
         // 4. 정보 담아서 리턴
         return LoginResBody.builder()
