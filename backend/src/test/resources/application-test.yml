@@ -7,4 +7,4 @@ custom:
     secret-key: test-secret-key-for-jwt-testing-only
     expire-seconds: "#{5}"
   refreshToken:
-    expire-seconds: "#{60}"
+    expire-seconds: "#{3}"
