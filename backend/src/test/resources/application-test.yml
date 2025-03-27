@@ -5,6 +5,6 @@ spring:
 custom:
   jwt:
     secret-key: test-secret-key-for-jwt-testing-only
-    expire-seconds: "#{5}"
+    expire-seconds: "#{2}"
   refreshToken:
-    expire-seconds: "#{3}"
+    expire-seconds: "#{10}"

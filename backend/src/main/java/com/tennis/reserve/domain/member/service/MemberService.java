@@ -94,4 +94,10 @@ public class MemberService {
     public Optional<Member> findById(Long id) {
         return memberRepository.findById(id);
     }
+
+    public Member getRealActor(Member actor) {
+        Optional<Member> userById = findById(actor.getId());
+        assert userById.isPresent();
+        return userById.get();
+    }
 }

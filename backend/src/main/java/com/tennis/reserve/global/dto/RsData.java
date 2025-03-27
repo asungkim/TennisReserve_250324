@@ -16,11 +16,11 @@ public class RsData<T> {
     private String code;
     @NonNull
     private String message;
-    @NonNull
+
     private T data;
 
     public RsData(String code, String message) {
-        this(code, message, (T) new Empty());
+        this(code, message, null);
     }
 
     @JsonIgnore

@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,10 +43,10 @@ class MemberControllerTest {
     private MemberService memberService;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private MemberAuthService memberAuthService;
 
     @Autowired
-    private MemberAuthService memberAuthService;
+    private MemberRepository memberRepository;
 
     @Autowired
     private MemberRedisService memberRedisService;
@@ -305,4 +307,110 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.message", containsString("비밀번호는 필수 입력값입니다.")));
     }
 
+
+    @Test
+    @DisplayName("마이페이지 - 유효한 accessToken → 정상 접근")
+    void me0() throws Exception {
+        // 회원가입
+        joinRequest("user1", "!password1", "nick1", "user1@test.com");
+
+        // 로그인
+        MvcResult loginResult = loginRequest("user1", "!password1").andReturn();
+
+        String accessToken = loginResult.getResponse().getCookie("accessToken").getValue();
+
+        ResultActions result = mvc
+                .perform(
+                        get("/api/members/me")
+                                .header("Authorization", "Bearer " + accessToken)
+                )
+                .andDo(print());
+
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-4"))
+                .andExpect(jsonPath("$.message").value("마이 페이지 접근에 성공하였습니다."));
+    }
+
+    @Test
+    @DisplayName("마이페이지 - accessToken 없이 접근")
+    void me1() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/members/me"))
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 유효하지 않은 accessToken")
+    void me2() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/members/me")
+                                .header("Authorization", "Bearer invalid.token.here"))
+
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-2"))
+                .andExpect(jsonPath("$.message").value("유효하지 않은 인증 토큰입니다. 다시 로그인해주세요."));
+    }
+
+
+    @Test
+    @DisplayName("마이페이지 - accessToken 만료 + refreshToken 있음 → accessToken 재발급")
+    void me3() throws Exception {
+        // 회원가입 및 로그인
+        joinRequest("user1", "!password1", "nick1", "user1@test.com");
+        loginRequest("user1", "!password1");
+
+        Member member = memberRepository.findByUsername("user1").orElseThrow();
+
+        // 🔥 accessToken 만료된 걸로 직접 생성
+        String expiredAccessToken = memberAuthService.generateAccessToken(member, -10); // 이미 만료됨
+
+        ResultActions result = mvc
+                .perform(
+                        get("/api/members/me")
+                                .header("Authorization", "Bearer " + expiredAccessToken)
+                )
+                .andDo(print());
+
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-4"))
+                .andExpect(jsonPath("$.message").value("마이 페이지 접근에 성공하였습니다."));
+    }
+
+    @Test
+    @DisplayName("마이페이지 - accessToken 만료 + refreshToken 없음 → 401 Unauthorized")
+    void me4() throws Exception {
+        joinRequest("user1", "!password1", "nick1", "user1@test.com");
+        loginRequest("user1", "!password1");
+
+        Member member = memberRepository.findByUsername("user1").orElseThrow();
+
+        // Redis에서 refreshToken 제거 (없음 가정)
+        memberRedisService.delete(member);
+
+        String expiredAccessToken = memberAuthService.generateAccessToken(member, -10);
+
+        ResultActions result = mvc
+                .perform(
+                        get("/api/members/me")
+                                .header("Authorization", "Bearer " + expiredAccessToken)
+                )
+                .andDo(print());
+
+        result
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("로그인 정보가 만료되었습니다. 다시 로그인해주세요."));
+    }
 }

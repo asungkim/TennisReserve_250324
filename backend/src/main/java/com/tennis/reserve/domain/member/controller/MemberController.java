@@ -4,6 +4,8 @@ import com.tennis.reserve.domain.member.dto.request.JoinReqForm;
 import com.tennis.reserve.domain.member.dto.request.LoginReqForm;
 import com.tennis.reserve.domain.member.dto.response.LoginResBody;
 import com.tennis.reserve.domain.member.dto.response.MemberResBody;
+import com.tennis.reserve.domain.member.entity.Member;
+import com.tennis.reserve.domain.member.service.MemberAuthService;
 import com.tennis.reserve.domain.member.service.MemberService;
 import com.tennis.reserve.global.dto.Empty;
 import com.tennis.reserve.global.dto.RsData;
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
 public class MemberController {
+
     private final MemberService memberService;
+    private final MemberAuthService memberAuthService;
 
     // TODO: 로그아웃, 내 정보 수정, 내 정보 조회
 
@@ -56,10 +60,14 @@ public class MemberController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public RsData<Empty> me() {
+    public RsData<MemberResBody> me() {
+        Member actor = memberAuthService.getUserIdentity();
+        Member realActor = memberService.getRealActor(actor);
+
         return new RsData<>(
                 "200-4",
-                "마이 페이지 접근에 성공하였습니다."
+                "마이 페이지 접근에 성공하였습니다.",
+                MemberResBody.fromEntity(realActor)
         );
     }
 

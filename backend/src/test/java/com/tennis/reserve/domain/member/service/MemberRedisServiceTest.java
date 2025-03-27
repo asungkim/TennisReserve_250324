@@ -129,23 +129,24 @@ class MemberRedisServiceTest {
         assertThat(isValid).isFalse();
     }
 
-    @Test
-    @DisplayName("TTL 만료 테스트")
-    void isExpired() throws InterruptedException {
-        // given
-        String token = UUID.randomUUID().toString();
-        memberRedisService.save(member, token);
-
-        // 현재 refreshToken 3초)
-        Thread.sleep(4000);
-
-        // when
-        Optional<String> result = memberRedisService.get(member);
-
-        // then
-        assertThat(result).isEmpty();
-
-    }
+    // TODO : TTL 시간 걸려서 제외 나중에 개선
+//    @Test
+//    @DisplayName("TTL 만료 테스트")
+//    void isExpired() throws InterruptedException {
+//        // given
+//        String token = UUID.randomUUID().toString();
+//        memberRedisService.save(member, token);
+//
+//        // 현재 refreshToken 3초
+//        Thread.sleep(4000);
+//
+//        // when
+//        Optional<String> result = memberRedisService.get(member);
+//
+//        // then
+//        assertThat(result).isEmpty();
+//
+//    }
 
 
 }

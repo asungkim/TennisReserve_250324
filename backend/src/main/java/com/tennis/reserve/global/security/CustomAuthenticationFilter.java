@@ -5,19 +5,20 @@ import com.tennis.reserve.domain.member.service.MemberAuthService;
 import com.tennis.reserve.domain.member.service.MemberRedisService;
 import com.tennis.reserve.domain.member.service.MemberService;
 import com.tennis.reserve.global.standard.util.Rq;
+import com.tennis.reserve.global.standard.util.Util;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
-@Configuration
+@Component
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
@@ -41,10 +42,15 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 2. 로그인이 필요한 기능인 경우 프론트가 보낸 토큰을 가져옴
-        String accessToken = getAccessTokenFromRequest();
+        String accessToken = getAccessTokenFromRequest(request);
 
         // 3. accessToken이 null이면 프론트가 안보낸거니까 filter 나감
         if (accessToken == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (!Util.Jwt.isWellFormedToken(accessToken)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -63,8 +69,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         // 5-2 가져온 유저 정보로 refreshToken을 구함
         if (opActor.isPresent()) {
-            Member actor = opActor.get(); // payload로 가져온 멤버
-            Optional<String> opRefreshToken = memberRedisService.get(actor);
+            Member actor = opActor.get();// payload로 가져온 멤버
+            Member realActor = memberService.findById(actor.getId()).get();
+            Optional<String> opRefreshToken = memberRedisService.get(realActor);
 
             // 5-3 refreshToken이 유효하면 newAccessToken 만들어서 쿠키에 등록
             if (opRefreshToken.isPresent()) {
@@ -74,6 +81,16 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("""
+                    {
+                        "code": "401-2",
+                        "message": "유효하지 않은 인증 토큰입니다. 다시 로그인해주세요."
+                    }
+                    """);
+            return;
         }
 
 
@@ -89,9 +106,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
-    private String getAccessTokenFromRequest() {
+    private String getAccessTokenFromRequest(HttpServletRequest request) {
         // 1. 헤더로부터 토큰 정보 가져옴
-        String authorization = rq.getHeader("Authorization");
+        String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.startsWith("Bearer ")) {
             return authorization.substring(7);
         }
