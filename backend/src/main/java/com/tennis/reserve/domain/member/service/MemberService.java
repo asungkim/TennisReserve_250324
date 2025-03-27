@@ -81,7 +81,7 @@ public class MemberService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new ServiceException("409-4", "아이디 또는 비밀번호가 올바르지 않습니다."));
 
-        if (!passwordEncoder.matches(member.getPassword(), password)) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new ServiceException("409-5", "비밀번호를 올바르게 입력해주세요.");
         }
 

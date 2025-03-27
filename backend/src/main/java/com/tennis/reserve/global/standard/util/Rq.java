@@ -11,10 +11,10 @@ import org.springframework.web.context.annotation.RequestScope;
 @RequestScope
 @RequiredArgsConstructor
 public class Rq {
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
 
-    public void addCookie(String name, String value,int maxAge) {
+    public void addCookie(String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
 
         cookie.setPath("/");
