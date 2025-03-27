@@ -2,7 +2,7 @@ package com.tennis.reserve.domain.member.controller;
 
 import com.tennis.reserve.domain.member.entity.Member;
 import com.tennis.reserve.domain.member.repository.MemberRepository;
-import com.tennis.reserve.domain.member.service.AuthTokenService;
+import com.tennis.reserve.domain.member.service.MemberAuthService;
 import com.tennis.reserve.domain.member.service.MemberRedisService;
 import com.tennis.reserve.domain.member.service.MemberService;
 import com.tennis.reserve.global.BaseTestConfig;
@@ -44,7 +44,7 @@ class MemberControllerTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private AuthTokenService authTokenService;
+    private MemberAuthService memberAuthService;
 
     @Autowired
     private MemberRedisService memberRedisService;
@@ -234,7 +234,7 @@ class MemberControllerTest {
 
         // accessToken 파싱
         String accessToken = result.andReturn().getResponse().getCookie("accessToken").getValue();
-        Map<String, Object> payload = authTokenService.getPayload(accessToken);
+        Map<String, Object> payload = memberAuthService.getPayload(accessToken);
         assertThat(payload.get("username")).isEqualTo("user1");
         assertThat(payload.get("nickname")).isEqualTo("nickname1");
 

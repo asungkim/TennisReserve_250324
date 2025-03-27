@@ -17,9 +17,9 @@ public class MemberRedisService {
     @Value("${custom.refreshToken.expire-seconds}")
     private Long expireSeconds;
 
-    public void save(Member member, String token) {
+    public void save(Member member, String refreshToken) {
         String key = REFRESH_TOKEN_KEY + member.getId();
-        memberRedisRepository.save(key, token, expireSeconds);
+        memberRedisRepository.save(key, refreshToken, expireSeconds);
     }
 
     public Optional<String> get(Member member) {

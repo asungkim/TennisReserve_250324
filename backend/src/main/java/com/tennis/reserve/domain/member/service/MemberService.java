@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -20,7 +22,7 @@ public class MemberService {
     private final MemberRedisService memberRedisService;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthTokenService authTokenService;
+    private final MemberAuthService memberAuthService;
     private final Rq rq;
 
     public MemberResBody createMember(JoinReqForm body) {
@@ -61,7 +63,7 @@ public class MemberService {
         Member member = validateLoginForm(loginReqForm.username(), loginReqForm.password());
 
         // 2. 토큰 발급
-        AuthToken authToken = authTokenService.generateAuthToken(member);
+        AuthToken authToken = memberAuthService.generateAuthToken(member);
 
         // 3. accessToken 쿠키에 저장, refreshToken redis에 저장
         String accessToken = authToken.accessToken();
@@ -86,5 +88,10 @@ public class MemberService {
         }
 
         return member;
+    }
+
+
+    public Optional<Member> findById(Long id) {
+        return memberRepository.findById(id);
     }
 }

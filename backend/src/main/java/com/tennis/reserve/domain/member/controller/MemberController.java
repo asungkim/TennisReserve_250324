@@ -9,10 +9,8 @@ import com.tennis.reserve.global.dto.Empty;
 import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/members")
@@ -20,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
     private final MemberService memberService;
 
-    // TODO: 로그인, 로그아웃, 내 정보 수정, 내 정보 조회
+    // TODO: 로그아웃, 내 정보 수정, 내 정보 조회
 
     @PostMapping("/join")
     public RsData<MemberResBody> createMember(@RequestBody @Valid JoinReqForm joinReqForm) {
@@ -43,4 +41,26 @@ public class MemberController {
                 loginResBody
         );
     }
+
+    @PostMapping("/logout")
+    public RsData<Empty> logoutMember() {
+
+        // 로그아웃 로직 - 현재 유저의 정보를 가져와 쿠키 제거 및 토큰 무효화
+        // memberService.logoutMember();
+
+        return new RsData<>(
+                "200-3",
+                "로그아웃에 성공하였습니다."
+        );
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public RsData<Empty> me() {
+        return new RsData<>(
+                "200-4",
+                "마이 페이지 접근에 성공하였습니다."
+        );
+    }
+
 }

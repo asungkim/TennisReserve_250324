@@ -37,4 +37,24 @@ public class Rq {
 
         response.addCookie(cookie);
     }
+
+    public String getHeader(String name) {
+        return response.getHeader(name);
+    }
+
+    public String getValueFromCookie(String name) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(name)) {
+                return cookie.getValue();
+            }
+        }
+
+        return null;
+    }
 }

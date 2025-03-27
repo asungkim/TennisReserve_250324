@@ -16,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class AuthTokenServiceTest {
+class MemberAuthServiceTest {
 
     @Autowired
-    private AuthTokenService authTokenService;
+    private MemberAuthService memberAuthService;
 
     private Member member;
 
@@ -40,12 +40,12 @@ class AuthTokenServiceTest {
     @DisplayName("토큰 생성")
     void generateToken() {
 
-        AuthToken authToken = authTokenService.generateAuthToken(member);
+        AuthToken authToken = memberAuthService.generateAuthToken(member);
         assertThat(authToken).isNotNull();
         assertThat(authToken.accessToken()).isNotBlank();
         assertThat(authToken.refreshToken()).isNotBlank();
 
-        Map<String, Object> payload = authTokenService.getPayload(authToken.accessToken());
+        Map<String, Object> payload = memberAuthService.getPayload(authToken.accessToken());
 
         Long id = ((Number) payload.get("id")).longValue();
         assertThat(id).isEqualTo(1L);

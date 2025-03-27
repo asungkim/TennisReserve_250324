@@ -1,5 +1,7 @@
 package com.tennis.reserve.global.security;
 
+import com.tennis.reserve.global.dto.RsData;
+import com.tennis.reserve.global.standard.util.Util;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,6 +27,35 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                // @PreAuthorize 예외 처리
+                .exceptionHandling(
+                        exceptionHandling -> exceptionHandling
+                                // isAuthenticated()
+                                .authenticationEntryPoint(
+                                        (request, response, authException) -> {
+                                            response.setContentType("application/json;charset=UTF-8");
+                                            response.setStatus(401);
+                                            response.getWriter().write(
+                                                    Util.Json.toString(
+                                                            new RsData<>("401-1", "잘못된 인증키입니다.")
+                                                    )
+                                            );
+                                        }
+                                )
+                                // hasRole()
+                                .accessDeniedHandler(
+                                        (request, response, authException) -> {
+                                            response.setContentType("application/json;charset=UTF-8");
+                                            response.setStatus(403);
+                                            response.getWriter().write(
+                                                    Util.Json.toString(
+                                                            new RsData<>("403-1", "접근 권한이 없습니다.")
+                                                    )
+                                            );
+                                        }
+                                )
+
                 );
 
         return http.build();
