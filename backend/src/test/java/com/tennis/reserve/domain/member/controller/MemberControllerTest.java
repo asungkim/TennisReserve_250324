@@ -245,4 +245,64 @@ class MemberControllerTest {
         assertThat(refreshTokenOpt).isPresent(); // refreshToken 저장됨
     }
 
+    @Test
+    @DisplayName("로그인 실패 - 없는 아이디")
+    void login2() throws Exception {
+        // 먼저 회원가입 (DB에 사용자 등록)
+        joinRequest("user1", "!password1", "nickname1", "user1@exam.com");
+
+        // 로그인 요청
+        ResultActions result = loginRequest("noUser", "!password1");
+
+        // LoginResBody 검증
+        result.andExpect(status().isConflict())
+                .andExpect(handler().methodName("loginMember"))
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(jsonPath("$.code").value("409-4"))
+                .andExpect(jsonPath("$.message").value("아이디 또는 비밀번호가 올바르지 않습니다."));
+
+        /*
+        if (!passwordEncoder.matches(password, member.getPassword())) {
+            throw new ServiceException("409-5", "비밀번호를 올바르게 입력해주세요.");
+        }
+        * */
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 틀린 비밀번호")
+    void login3() throws Exception {
+        // 먼저 회원가입 (DB에 사용자 등록)
+        joinRequest("user1", "!password1", "nickname1", "user1@exam.com");
+
+        // 로그인 요청
+        ResultActions result = loginRequest("user1", "wrong");
+
+        // LoginResBody 검증
+        result.andExpect(status().isConflict())
+                .andExpect(handler().methodName("loginMember"))
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(jsonPath("$.code").value("409-5"))
+                .andExpect(jsonPath("$.message").value("비밀번호를 올바르게 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - Valid 검증")
+    void login4() throws Exception {
+        // 먼저 회원가입 (DB에 사용자 등록)
+        joinRequest("user1", "!password1", "nickname1", "user1@exam.com");
+
+        // 로그인 요청
+        String loginUsername = "";
+        String loginPassword = "";
+        ResultActions result = loginRequest(loginUsername, loginPassword);
+
+        // LoginResBody 검증
+        result.andExpect(status().isBadRequest())
+                .andExpect(handler().methodName("loginMember"))
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(jsonPath("$.code").value("400-1"))
+                .andExpect(jsonPath("$.message", containsString("아이디는 필수 입력값입니다.")))
+                .andExpect(jsonPath("$.message", containsString("비밀번호는 필수 입력값입니다.")));
+    }
+
 }
