@@ -97,7 +97,7 @@ class MemberServiceTest {
 
         // then
         assertThat(result.getAccessToken()).isNotBlank();
-        assertThat(result.getItem().getUsername()).isEqualTo("testUser");
+        assertThat(result.getItems().getUsername()).isEqualTo("testUser");
     }
 
     @Test

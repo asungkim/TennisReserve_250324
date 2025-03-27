@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class LoginResBody {
-    private MemberResBody item;
+    private MemberResBody items;
     private String accessToken;
 }

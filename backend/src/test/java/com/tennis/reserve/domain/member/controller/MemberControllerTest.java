@@ -1,6 +1,11 @@
 package com.tennis.reserve.domain.member.controller;
 
+import com.tennis.reserve.domain.member.entity.Member;
+import com.tennis.reserve.domain.member.repository.MemberRepository;
+import com.tennis.reserve.domain.member.service.AuthTokenService;
+import com.tennis.reserve.domain.member.service.MemberRedisService;
 import com.tennis.reserve.domain.member.service.MemberService;
+import com.tennis.reserve.global.BaseTestConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +18,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -23,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@BaseTestConfig
 class MemberControllerTest {
 
     @Autowired
@@ -30,6 +39,15 @@ class MemberControllerTest {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private AuthTokenService authTokenService;
+
+    @Autowired
+    private MemberRedisService memberRedisService;
 
     private ResultActions joinRequest(String username, String password, String nickname, String email) throws Exception {
         return mvc
@@ -60,7 +78,7 @@ class MemberControllerTest {
         String nickname = "userOne";
         String email = "user1@exam.com";
 
-        ResultActions resultActions = joinRequest(username,password,nickname,email);
+        ResultActions resultActions = joinRequest(username, password, nickname, email);
 
         resultActions
                 .andExpect(status().isOk())
@@ -78,7 +96,7 @@ class MemberControllerTest {
         String nickname = "userOne";
         String email = "user1@exam.com";
 
-        ResultActions resultActions = joinRequest(username,password,nickname,email);
+        ResultActions resultActions = joinRequest(username, password, nickname, email);
 
         resultActions
                 .andExpect(status().isOk())
@@ -87,7 +105,7 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("회원가입에 성공하였습니다."));
 
-        ResultActions same = joinRequest(username,password,nickname,email);
+        ResultActions same = joinRequest(username, password, nickname, email);
         same
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("409-1"))
@@ -103,7 +121,7 @@ class MemberControllerTest {
         String nickname1 = "userOne";
         String email1 = "user1@exam.com";
 
-        ResultActions resultActions = joinRequest(username1,password1,nickname1,email1);
+        ResultActions resultActions = joinRequest(username1, password1, nickname1, email1);
 
         resultActions
                 .andExpect(status().isOk())
@@ -117,7 +135,7 @@ class MemberControllerTest {
         String nickname2 = "userOne";
         String email2 = "user2@exam.com";
 
-        ResultActions sameNickname = joinRequest(username2,password2,nickname2,email2);
+        ResultActions sameNickname = joinRequest(username2, password2, nickname2, email2);
         sameNickname
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("409-2"))
@@ -133,7 +151,7 @@ class MemberControllerTest {
         String nickname1 = "userOne";
         String email1 = "user1@exam.com";
 
-        ResultActions resultActions = joinRequest(username1,password1,nickname1,email1);
+        ResultActions resultActions = joinRequest(username1, password1, nickname1, email1);
 
         resultActions
                 .andExpect(status().isOk())
@@ -147,7 +165,7 @@ class MemberControllerTest {
         String nickname2 = "userTwo";
         String email2 = "user1@exam.com";
 
-        ResultActions sameNickname = joinRequest(username2,password2,nickname2,email2);
+        ResultActions sameNickname = joinRequest(username2, password2, nickname2, email2);
         sameNickname
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("409-3"))
@@ -163,7 +181,7 @@ class MemberControllerTest {
         String nickname1 = "";
         String email1 = "";
 
-        ResultActions resultActions = joinRequest(username1,password1,nickname1,email1);
+        ResultActions resultActions = joinRequest(username1, password1, nickname1, email1);
 
         resultActions
                 .andExpect(status().isBadRequest())
@@ -178,6 +196,53 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.message", containsString("이메일은 필수 입력값입니다.")));
 
 
-
     }
+
+    private ResultActions loginRequest(String username, String password) throws Exception {
+        return mvc.perform(post("/api/members/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "username": "%s",
+                                    "password": "%s"
+                                }
+                                """.formatted(username, password).stripIndent())
+                )
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("로그인 - 성공")
+    void login1() throws Exception {
+        // 먼저 회원가입 (DB에 사용자 등록)
+        joinRequest("user1", "!password1", "nickname1", "user1@exam.com");
+
+        // 로그인 요청
+        ResultActions result = loginRequest("user1", "!password1");
+
+        // LoginResBody 검증
+        result.andExpect(status().isOk())
+                .andExpect(handler().methodName("loginMember"))
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(jsonPath("$.code").value("200-2"))
+                .andExpect(jsonPath("$.message").value("로그인에 성공하였습니다."))
+                .andExpect(jsonPath("$.data.items.username").value("user1"))
+                .andExpect(jsonPath("$.data.items.nickname").value("nickname1"))
+                .andExpect(jsonPath("$.data.items.email").value("user1@exam.com"))
+                .andExpect(jsonPath("$.data.accessToken").exists())
+                .andExpect(cookie().exists("accessToken"));
+
+        // accessToken 파싱
+        String accessToken = result.andReturn().getResponse().getCookie("accessToken").getValue();
+        Map<String, Object> payload = authTokenService.getPayload(accessToken);
+        assertThat(payload.get("username")).isEqualTo("user1");
+        assertThat(payload.get("nickname")).isEqualTo("nickname1");
+
+        // redis 저장 확인
+        Long memberId = Long.valueOf(payload.get("id").toString());
+        Member member = memberRepository.findById(memberId).orElseThrow();
+        Optional<String> refreshTokenOpt = memberRedisService.get(member);
+        assertThat(refreshTokenOpt).isPresent(); // refreshToken 저장됨
+    }
+
 }

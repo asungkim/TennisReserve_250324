@@ -72,7 +72,7 @@ public class MemberService {
 
         // 4. 정보 담아서 리턴
         return LoginResBody.builder()
-                .item(MemberResBody.fromEntity(member))
+                .items(MemberResBody.fromEntity(member))
                 .accessToken(accessToken)
                 .build();
     }
