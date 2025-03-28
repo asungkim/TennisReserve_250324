@@ -12,6 +12,7 @@ import com.tennis.reserve.global.standard.util.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -25,6 +26,7 @@ public class MemberService {
     private final MemberAuthService memberAuthService;
     private final Rq rq;
 
+    @Transactional
     public MemberResBody createMember(JoinReqForm body) {
         // 1. username, nickname, email 중복 체크
         validateDuplicateMember(body.username(), body.nickname(), body.email());
@@ -57,7 +59,7 @@ public class MemberService {
         }
     }
 
-
+    @Transactional
     public LoginResBody loginMember(LoginReqForm loginReqForm) {
         // 1. 로그인 입력 폼 검증 후 멤버 리턴
         Member member = validateLoginForm(loginReqForm.username(), loginReqForm.password());
@@ -91,10 +93,12 @@ public class MemberService {
     }
 
 
+    @Transactional(readOnly = true)
     public Optional<Member> findById(Long id) {
         return memberRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public Member getRealActor(Member actor) {
         Optional<Member> userById = findById(actor.getId());
         assert userById.isPresent();

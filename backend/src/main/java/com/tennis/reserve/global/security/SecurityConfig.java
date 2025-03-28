@@ -39,7 +39,7 @@ public class SecurityConfig {
                 // @PreAuthorize 예외 처리
                 .exceptionHandling(
                         exceptionHandling -> exceptionHandling
-                                // isAuthenticated()
+                                // authorizeHttpRequests 예외 발생 시
                                 .authenticationEntryPoint(
                                         (request, response, authException) -> {
                                             response.setContentType("application/json;charset=UTF-8");
@@ -51,7 +51,7 @@ public class SecurityConfig {
                                             );
                                         }
                                 )
-                                // hasRole()
+                                // PreAuthorize 권한 부족 시
                                 .accessDeniedHandler(
                                         (request, response, authException) -> {
                                             response.setContentType("application/json;charset=UTF-8");

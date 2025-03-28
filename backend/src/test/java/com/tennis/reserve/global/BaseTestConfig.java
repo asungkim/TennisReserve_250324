@@ -1,6 +1,5 @@
 package com.tennis.reserve.global;
 
-import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -13,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ActiveProfiles("test")
 @Import(TestConfig.class)
-@Transactional
+//@Transactional
 public @interface BaseTestConfig {
 }
 
