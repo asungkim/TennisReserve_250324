@@ -3,9 +3,7 @@ package com.tennis.reserve.domain.tennis.entity;
 import com.tennis.reserve.domain.base.BaseEntity;
 import com.tennis.reserve.domain.tennis.enums.TimeSlotStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -25,8 +23,10 @@ public class TimeSlot extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TimeSlotStatus status;
+    @Builder.Default
+    private TimeSlotStatus status = TimeSlotStatus.AVAILABLE;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Setter
     private Court court;
 }

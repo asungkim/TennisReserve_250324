@@ -4,9 +4,7 @@ import com.tennis.reserve.domain.base.BaseEntity;
 import com.tennis.reserve.domain.tennis.enums.Environment;
 import com.tennis.reserve.domain.tennis.enums.SurfaceType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -31,10 +29,16 @@ public class Court extends BaseEntity {
     private Environment environment;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Setter
     private TennisCourt tennisCourt;
 
     @OneToMany(mappedBy = "court", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<TimeSlot> timeSlots = new ArrayList<>();
 
 
+    public void addTimeSlot(TimeSlot timeSlot) {
+        timeSlots.add(timeSlot);
+        timeSlot.setCourt(this);
+    }
 }

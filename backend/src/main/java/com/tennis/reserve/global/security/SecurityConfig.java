@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 여기서 permitAll()은 WHITELIST만 허용
                         .requestMatchers("/api/members/login", "/api/members/join").permitAll()
+                        .requestMatchers("api/tennis-courts/**", "api/courts/**", "api/timeSlots/**").permitAll()
                         .anyRequest().authenticated() // 나머지는 인증 필요
                 )
                 .headers(headers -> headers
