@@ -47,9 +47,9 @@ class MemberServiceTest {
         MemberResBody result = memberService.createMember(form);
 
         // then : 받은 dto를 통해 assertThat 검증
-        assertThat(result.getUsername()).isEqualTo("testUser");
-        assertThat(result.getNickname()).isEqualTo("nickname");
-        assertThat(result.getEmail()).isEqualTo("test@example.com");
+        assertThat(result.username()).isEqualTo("testUser");
+        assertThat(result.nickname()).isEqualTo("nickname");
+        assertThat(result.email()).isEqualTo("test@example.com");
     }
 
     @Test
@@ -98,8 +98,8 @@ class MemberServiceTest {
         LoginResBody result = memberService.loginMember(form);
 
         // then
-        assertThat(result.getAccessToken()).isNotBlank();
-        assertThat(result.getItems().getUsername()).isEqualTo("testUser");
+        assertThat(result.accessToken()).isNotBlank();
+        assertThat(result.items().username()).isEqualTo("testUser");
     }
 
     @Test
