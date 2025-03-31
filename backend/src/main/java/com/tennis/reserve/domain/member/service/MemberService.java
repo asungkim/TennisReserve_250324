@@ -14,8 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -93,15 +91,29 @@ public class MemberService {
     }
 
 
-    @Transactional(readOnly = true)
-    public Optional<Member> findById(Long id) {
-        return memberRepository.findById(id);
+    public Member findById(Long id) {
+        return memberRepository.findById(id).orElseThrow(
+                () -> new ServiceException("404-1", "해당 사용자가 존재하지 않습니다.")
+        );
     }
 
-    @Transactional(readOnly = true)
     public Member getRealActor(Member actor) {
-        Optional<Member> userById = findById(actor.getId());
-        assert userById.isPresent();
-        return userById.get();
+        return findById(actor.getId());
+    }
+
+    public void logoutMember() {
+        // 쿠키 삭제, redis에서 토큰삭제
+        rq.removeCookie("accessToken");
+
+        Member actor = memberAuthService.getUserIdentity();
+        Member realActor = findById(actor.getId());
+
+        memberRedisService.delete(realActor);
+    }
+
+    public Member findByUsername(String username) {
+        return memberRepository.findByUsername(username).orElseThrow(
+                () -> new ServiceException("404-1", "해당 사용자가 존재하지 않습니다.")
+        );
     }
 }

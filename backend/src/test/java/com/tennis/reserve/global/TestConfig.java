@@ -16,7 +16,7 @@ public class TestConfig {
      * Redis TestContainer 설정
      */
     private static final GenericContainer<?> redisTestContainer =
-            new GenericContainer<>("redis:7.0.8-alpine")
+            new GenericContainer<>("redis:7.2.4-alpine")
                     .withExposedPorts(6379)
                     .withReuse(true);
 

@@ -307,6 +307,48 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.message", containsString("비밀번호는 필수 입력값입니다.")));
     }
 
+    @Test
+    @DisplayName("로그아웃 성공")
+    void logout1() throws Exception {
+        // 먼저 회원가입 (DB에 사용자 등록)
+        joinRequest("user1", "!password1", "nickname1", "user1@exam.com");
+
+        // 로그인 요청
+        MvcResult loginResult = loginRequest("user1", "!password1").andReturn();
+        String accessToken = loginResult.getResponse().getCookie("accessToken").getValue();
+
+        // 로그아웃
+        ResultActions result = mvc.perform(post("/api/members/logout")
+                        .header("Authorization", "Bearer " + accessToken)
+
+                )
+                .andDo(print());
+
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-3"))
+                .andExpect(jsonPath("$.message").value("로그아웃에 성공하였습니다."))
+                .andExpect(cookie().maxAge("accessToken", 0));
+
+        Member member = memberService.findByUsername("user1");
+        assertThat(memberRedisService.get(member)).isEmpty();
+
+    }
+
+    @Test
+    @DisplayName("로그아웃 실패 - 인증 없이 접근")
+    void logout2() throws Exception {
+        // 로그아웃
+        ResultActions result = mvc.perform(post("/api/members/logout"))
+                .andDo(print());
+
+        result
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+
+    }
+
 
     @Test
     @DisplayName("마이페이지 - 유효한 accessToken → 정상 접근")

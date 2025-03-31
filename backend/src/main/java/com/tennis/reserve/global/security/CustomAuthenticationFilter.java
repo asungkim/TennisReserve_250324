@@ -70,10 +70,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         // 5-2 가져온 유저 정보로 refreshToken을 구함
         if (opActor.isPresent()) {
             Member actor = opActor.get();// payload로 가져온 멤버
-            Member realActor = memberService.findById(actor.getId()).get();
+            Member realActor = memberService.findById(actor.getId());
             Optional<String> opRefreshToken = memberRedisService.get(realActor);
 
             // 5-3 refreshToken이 유효하면 newAccessToken 만들어서 쿠키에 등록
+            // TODO : 존재 여부만으로 재발급 해주는건 위험할 수 있음 (refreshToken을 jwt로?)
             if (opRefreshToken.isPresent()) {
                 String newAccessToken = memberAuthService.generateAccessToken(actor);
                 rq.addCookie("accessToken", newAccessToken, 60 * 60);

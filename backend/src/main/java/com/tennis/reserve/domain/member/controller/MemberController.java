@@ -47,10 +47,9 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     public RsData<Empty> logoutMember() {
-
-        // 로그아웃 로직 - 현재 유저의 정보를 가져와 쿠키 제거 및 토큰 무효화
-        // memberService.logoutMember();
+        memberService.logoutMember();
 
         return new RsData<>(
                 "200-3",
