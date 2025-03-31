@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TennisCourtRepository extends JpaRepository<TennisCourt, Long> {
+    boolean existsByName(String name);
 }

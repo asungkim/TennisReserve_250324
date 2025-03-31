@@ -20,7 +20,7 @@ public class TennisCourtService {
     @Transactional
     public TennisCourtResponse createTennisCourt(TennisCourtReqForm tennisCourtReqForm) {
 
-        // TODO : 중복 테니스장 등록 검증
+        validateTennisCourtName(tennisCourtReqForm.name());
 
         TennisCourt tennisCourt = TennisCourt.builder()
                 .name(tennisCourtReqForm.name())
@@ -31,6 +31,14 @@ public class TennisCourtService {
         tennisCourtRepository.save(tennisCourt);
 
         return TennisCourtResponse.fromEntity(tennisCourt);
+    }
+
+    private void validateTennisCourtName(String name) {
+        boolean isExist = tennisCourtRepository.existsByName(name);
+
+        if (isExist) {
+            throw new ServiceException("409-6", "이미 같은 이름의 테니스장이 존재합니다.");
+        }
     }
 
 

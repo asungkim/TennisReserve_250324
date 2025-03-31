@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class CourtService {
@@ -21,6 +23,9 @@ public class CourtService {
 
     @Transactional
     public CourtResponse createCourt(CourtReqForm courtReqForm) {
+
+        // 검증 -> 해당 테니스장의 이미 같은 courtCode가 있는지 검증
+        validateDuplicateCourtCode(courtReqForm.courtCode(), courtReqForm.tennisCourtId());
 
         TennisCourt tennisCourt = tennisCourtService.findById(courtReqForm.tennisCourtId());
 
@@ -35,6 +40,15 @@ public class CourtService {
         courtRepository.save(court);
 
         return CourtResponse.fromEntity(court);
+    }
+
+    private void validateDuplicateCourtCode(String courtCode, Long tennisCourtId) {
+        TennisCourt tennisCourt = tennisCourtService.findById(tennisCourtId);
+        Optional<Court> opFirst = tennisCourt.getCourts().stream().filter(court -> court.getCourtCode().equals(courtCode)).findFirst();
+
+        if (opFirst.isPresent()) {
+            throw new ServiceException("409-1", "해당 테니스장에는 이미 %s 코트가 존재합니다.".formatted(courtCode));
+        }
     }
 
     public Court findById(Long id) {
