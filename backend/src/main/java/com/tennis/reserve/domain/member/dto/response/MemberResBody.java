@@ -1,31 +1,27 @@
 package com.tennis.reserve.domain.member.dto.response;
 
 import com.tennis.reserve.domain.member.entity.Member;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
-@Getter
-@NoArgsConstructor
-public class MemberResBody {
-    private Long id;
-    private String username;
-    private String nickname;
-    private String email;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-
-    public MemberResBody(Member member) {
-        this.id = member.getId();
-        this.username = member.getUsername();
-        this.nickname = member.getNickname();
-        this.email = member.getEmail();
-        this.createdAt = member.getCreatedAt();
-        this.modifiedAt = member.getModifiedAt();
-    }
-
+@Builder
+public record MemberResBody(
+        Long id,
+        String username,
+        String nickname,
+        String email,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt
+) {
     public static MemberResBody fromEntity(Member member) {
-        return new MemberResBody(member);
+        return MemberResBody.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .nickname(member.getNickname())
+                .email(member.getEmail())
+                .createdAt(member.getCreatedAt())
+                .modifiedAt(member.getModifiedAt())
+                .build();
     }
 }
