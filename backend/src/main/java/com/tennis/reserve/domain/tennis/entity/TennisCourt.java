@@ -1,4 +1,4 @@
-package com.tennis.reserve.domain.tennisCourt.entity;
+package com.tennis.reserve.domain.tennis.entity;
 
 import com.tennis.reserve.domain.base.BaseEntity;
 import jakarta.persistence.CascadeType;
@@ -32,4 +32,6 @@ public class TennisCourt extends BaseEntity {
     @OneToMany(mappedBy = "tennisCourt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Court> courts = new ArrayList<>();
 
+    @OneToMany(mappedBy = "tennisCourt",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<TennisCourtManager> managers = new ArrayList<>();
 }

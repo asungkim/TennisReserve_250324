@@ -1,7 +1,7 @@
-package com.tennis.reserve.domain.tennisCourt.entity;
+package com.tennis.reserve.domain.tennis.entity;
 
 import com.tennis.reserve.domain.base.BaseEntity;
-import com.tennis.reserve.domain.tennisCourt.enums.TimeSlotStatus;
+import com.tennis.reserve.domain.tennis.enums.TimeSlotStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +24,7 @@ public class TimeSlot extends BaseEntity {
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TimeSlotStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)

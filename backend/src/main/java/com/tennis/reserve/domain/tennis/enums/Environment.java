@@ -1,4 +1,4 @@
-package com.tennis.reserve.domain.tennisCourt.enums;
+package com.tennis.reserve.domain.tennis.enums;
 
 public enum Environment {
     INDOOR,

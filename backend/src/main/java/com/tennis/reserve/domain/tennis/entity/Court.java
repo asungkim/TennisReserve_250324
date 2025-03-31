@@ -1,8 +1,8 @@
-package com.tennis.reserve.domain.tennisCourt.entity;
+package com.tennis.reserve.domain.tennis.entity;
 
 import com.tennis.reserve.domain.base.BaseEntity;
-import com.tennis.reserve.domain.tennisCourt.enums.Environment;
-import com.tennis.reserve.domain.tennisCourt.enums.SurfaceType;
+import com.tennis.reserve.domain.tennis.enums.Environment;
+import com.tennis.reserve.domain.tennis.enums.SurfaceType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,9 +23,11 @@ public class Court extends BaseEntity {
     private String courtCode;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private SurfaceType surfaceType;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Environment environment;
 
     @ManyToOne(fetch = FetchType.LAZY)
