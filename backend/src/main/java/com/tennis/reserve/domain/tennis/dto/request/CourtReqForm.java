@@ -2,12 +2,20 @@ package com.tennis.reserve.domain.tennis.dto.request;
 
 import com.tennis.reserve.domain.tennis.enums.Environment;
 import com.tennis.reserve.domain.tennis.enums.SurfaceType;
-import org.springframework.lang.NonNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CourtReqForm(
-        @NonNull String courtCode,
-        @NonNull SurfaceType surfaceType,
-        @NonNull Environment environment,
-        @NonNull Long tennisCourtId
+        @NotBlank(message = "코트 코드는 필수 입력값입니다.")
+        String courtCode,
+
+        @NotNull(message = "표면 종류(SurfaceType)는 필수 입력값입니다.")
+        SurfaceType surfaceType,
+
+        @NotNull(message = "환경(Environment)은 필수 입력값입니다.")
+        Environment environment,
+
+        @NotNull(message = "테니스장 ID는 필수 입력값입니다.")
+        Long tennisCourtId
 ) {
 }

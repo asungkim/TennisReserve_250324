@@ -1,12 +1,18 @@
 package com.tennis.reserve.domain.tennis.dto.request;
 
-import org.springframework.lang.NonNull;
+
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 public record TimeSlotReqForm(
-        @NonNull Long courtId,
-        @NonNull LocalDateTime startTime,
-        @NonNull LocalDateTime endTime
+        @NotNull(message = "코트 ID는 필수 입력값입니다.")
+        Long courtId,
+
+        @NotNull(message = "시작 시간은 필수 입력값입니다.")
+        LocalDateTime startTime,
+
+        @NotNull(message = "종료 시간은 필수 입력값입니다.")
+        LocalDateTime endTime
 ) {
 }

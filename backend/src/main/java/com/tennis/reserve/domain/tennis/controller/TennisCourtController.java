@@ -24,7 +24,7 @@ public class TennisCourtController {
 
         return new RsData<>(
                 "200-3",
-                "%s이 등록되었습니다".formatted(tennisCourtResponse.name()),
+                "%s이 등록되었습니다.".formatted(tennisCourtResponse.name()),
                 tennisCourtResponse
         );
     }
