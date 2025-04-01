@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/timeSlots")
+@RequestMapping("/api/time-slots")
 public class TimeSlotController {
 
     private final TimeSlotService timeSlotService;
@@ -24,7 +24,7 @@ public class TimeSlotController {
 
         return new RsData<>(
                 "200-3",
-                "시간대가 등록되었습니다",
+                "시간대가 등록되었습니다.",
                 timeSlotResponse
         );
     }
