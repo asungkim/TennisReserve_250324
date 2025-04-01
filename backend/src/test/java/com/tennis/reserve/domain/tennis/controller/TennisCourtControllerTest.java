@@ -107,4 +107,33 @@ class TennisCourtControllerTest {
                 .andExpect(jsonPath("$.code").value("409-6"))
                 .andExpect(jsonPath("$.message").value("이미 같은 이름의 테니스장이 존재합니다."));
     }
+
+    @Test
+    @DisplayName("테니스장 목록 조회 - 성공")
+    void getList() throws Exception {
+        // given
+        String name = "잠실올림픽코트";
+        String location = "서울 송파구";
+        String imageUrl = "http://image1.url";
+        createTennisCourtRequest(name, location, imageUrl);
+
+        String name2 = "양재한강코트";
+        String location2 = "서울 강남구";
+        String imageUrl2 = "http://image2.url";
+        createTennisCourtRequest(name2, location2, imageUrl2);
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts"))
+                .andDo(print());
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(handler().handlerType(TennisCourtController.class))
+                .andExpect(handler().methodName("getTennisCourts"))
+                .andExpect(jsonPath("$.code").value("200-4"))
+                .andExpect(jsonPath("$.message").value("테니스장 목록을 조회하였습니다."))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[1].name").value(name2));
+    }
 }
