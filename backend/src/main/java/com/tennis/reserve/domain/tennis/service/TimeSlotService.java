@@ -22,7 +22,7 @@ public class TimeSlotService {
     @Transactional
     public TimeSlotResponse createTimeSlot(TimeSlotReqForm timeSlotReqForm) {
 
-        // 검증 -> 해당 코트에는 이미 해당 시간대가 존재하는지
+        // 검증 -> 해당 코트에 이미 겹치는 시간대가 등록되어있는지
         validateDuplicateTimeSlot(timeSlotReqForm);
 
         Court court = courtService.findById(timeSlotReqForm.courtId());
