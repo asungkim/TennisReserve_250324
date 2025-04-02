@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +41,20 @@ public class Member extends BaseTime {
     @Builder.Default
     private Role role = Role.USER;
 
+    public static Member createAdmin() {
+        return Member.builder()
+                .username("admin")
+                .password("!password1")
+                .nickname("adminNick")
+                .email("admin@exam.com")
+                .role(Role.ADMIN)
+                .build();
+    }
+
+    public void encodePassword(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(this.password);
+    }
+
     public boolean isAdmin() {
         return role.equals(Role.ADMIN);
     }
@@ -64,7 +79,7 @@ public class Member extends BaseTime {
             authorities.add("ROLE_ADMIN");
         } else if (isManager()) {
             authorities.add("ROLE_MANAGER");
-        }
+        } else authorities.add("ROLE_USER");
 
         return authorities;
     }

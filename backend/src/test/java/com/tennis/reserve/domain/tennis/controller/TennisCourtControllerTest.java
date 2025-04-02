@@ -1,11 +1,20 @@
 package com.tennis.reserve.domain.tennis.controller;
 
+import com.tennis.reserve.domain.member.dto.request.JoinReqForm;
+import com.tennis.reserve.domain.member.dto.request.LoginReqForm;
+import com.tennis.reserve.domain.member.dto.response.LoginResBody;
+import com.tennis.reserve.domain.member.dto.response.MemberResBody;
+import com.tennis.reserve.domain.member.entity.Member;
+import com.tennis.reserve.domain.member.repository.MemberRepository;
+import com.tennis.reserve.domain.member.service.MemberService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -14,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -25,8 +35,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TennisCourtControllerTest {
 
     @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     private MockMvc mvc;
 
+    @Autowired
+    private MemberService memberService;
+
+    private String accessToken;
+
+    private String adminAccessToken;
+    @Autowired
+    private MemberRepository memberRepository;
 
     private ResultActions createTennisCourtRequest(String name, String location, String imageUrl) throws Exception {
         return mvc.perform(post("/api/tennis-courts")
@@ -38,12 +59,28 @@ class TennisCourtControllerTest {
                                 }
                                 """.formatted(name, location, imageUrl).stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .header("Authorization", "Bearer " + adminAccessToken)
                 )
                 .andDo(print());
     }
 
+    @BeforeEach
+    void setUp() {
+        // 회원가입 후 로그인(일반 회원)
+        MemberResBody member = memberService.createMember(new JoinReqForm("user1", "!password1", "userNick", "user1@exam.com"));
+        LoginResBody loginResBody = memberService.loginMember(new LoginReqForm("user1", "!password1"));
+        accessToken = loginResBody.accessToken();
+
+        // 회원가입 후 로그인(어드민)
+        Member admin = Member.createAdmin();
+        admin.encodePassword(passwordEncoder);
+        memberRepository.save(admin);
+        LoginResBody adminLogin = memberService.loginMember(new LoginReqForm("admin", "!password1"));
+        adminAccessToken = adminLogin.accessToken();
+    }
+
     @Test
-    @DisplayName("테니스장 등록 성공")
+    @DisplayName("테니스장 등록 성공 - 관리자가 생성")
     void create1() throws Exception {
         // given
         String name = "양평누리 테니스장";
@@ -109,7 +146,7 @@ class TennisCourtControllerTest {
     }
 
     @Test
-    @DisplayName("테니스장 목록 조회 - 성공")
+    @DisplayName("테니스장 목록 조회 성공 - 유저가 생성")
     void getList() throws Exception {
         // given
         String name = "잠실올림픽코트";
@@ -123,7 +160,8 @@ class TennisCourtControllerTest {
         createTennisCourtRequest(name2, location2, imageUrl2);
 
         // when
-        ResultActions result = mvc.perform(get("/api/tennis-courts"))
+        ResultActions result = mvc.perform(get("/api/tennis-courts")
+                        .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
 
         // then

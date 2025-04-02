@@ -1,6 +1,7 @@
 package com.tennis.reserve.domain.member.dto.response;
 
 import com.tennis.reserve.domain.member.entity.Member;
+import com.tennis.reserve.domain.member.entity.Role;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,8 @@ public record MemberResBody(
         String nickname,
         String email,
         LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        LocalDateTime modifiedAt,
+        Role role
 ) {
     public static MemberResBody fromEntity(Member member) {
         return MemberResBody.builder()
@@ -22,6 +24,7 @@ public record MemberResBody(
                 .email(member.getEmail())
                 .createdAt(member.getCreatedAt())
                 .modifiedAt(member.getModifiedAt())
+                .role(member.getRole())
                 .build();
     }
 }

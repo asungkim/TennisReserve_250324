@@ -14,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -81,7 +80,7 @@ public class MemberAuthService {
                 ));
     }
 
-    public String generateAccessToken(Member member,int tokenExpireSeconds) {
+    public String generateAccessToken(Member member, int tokenExpireSeconds) {
         return Util.Jwt.createToken(
                 keyString,
                 tokenExpireSeconds,
@@ -103,7 +102,7 @@ public class MemberAuthService {
     }
 
     public void setLogin(Member actor) {
-        UserDetails user = new SecurityUser(actor.getId(), actor.getUsername(), "", "", actor.getRole(), List.of());
+        UserDetails user = new SecurityUser(actor.getId(), actor.getUsername(), "", "", actor.getRole(), actor.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())

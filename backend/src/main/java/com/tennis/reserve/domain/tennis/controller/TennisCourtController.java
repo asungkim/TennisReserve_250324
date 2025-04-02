@@ -6,6 +6,7 @@ import com.tennis.reserve.domain.tennis.service.TennisCourtService;
 import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ public class TennisCourtController {
     private final TennisCourtService tennisCourtService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public RsData<TennisCourtResponse> createTennisCourt(@RequestBody @Valid TennisCourtReqForm tennisCourtReqForm) {
         TennisCourtResponse tennisCourtResponse = tennisCourtService.createTennisCourt(tennisCourtReqForm);
 
@@ -31,6 +33,7 @@ public class TennisCourtController {
 
     @GetMapping
     @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('USER')")
     public RsData<List<TennisCourtResponse>> getTennisCourts() {
         List<TennisCourtResponse> tennisCourtList = tennisCourtService.getTennisCourts();
 

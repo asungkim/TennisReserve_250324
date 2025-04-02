@@ -6,6 +6,7 @@ import com.tennis.reserve.domain.tennis.service.CourtService;
 import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ public class CourtController {
     private final CourtService courtService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public RsData<CourtResponse> createCourt(@RequestBody @Valid CourtReqForm courtReqForm) {
         CourtResponse courtResponse = courtService.createCourt(courtReqForm);
 
