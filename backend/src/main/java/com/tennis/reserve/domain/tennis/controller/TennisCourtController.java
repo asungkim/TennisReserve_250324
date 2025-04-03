@@ -43,4 +43,20 @@ public class TennisCourtController {
                 tennisCourtList
         );
     }
+
+    // TODO : 단건 조회, 수정, 삭제
+
+    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('USER')")
+    public RsData<TennisCourtResponse> getTennisCourt(@PathVariable Long id) {
+        TennisCourtResponse tennisCourtResponse = tennisCourtService.getTennisCourt(id);
+
+        return new RsData<>(
+                "200-5",
+                "%s 조회하였습니다.".formatted(tennisCourtResponse.name()),
+                tennisCourtResponse
+        );
+    }
+
 }

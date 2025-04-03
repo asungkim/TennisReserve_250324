@@ -54,4 +54,12 @@ public class TennisCourtService {
                 .map(TennisCourtResponse::fromEntity)
                 .toList();
     }
+
+    public TennisCourtResponse getTennisCourt(Long id) {
+        return tennisCourtRepository.findById(id)
+                .map(TennisCourtResponse::fromEntity)
+                .orElseThrow(
+                        () -> new ServiceException("404-1", "존재하지 않는 테니스장입니다.")
+                );
+    }
 }

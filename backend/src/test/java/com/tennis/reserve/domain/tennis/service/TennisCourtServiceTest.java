@@ -58,6 +58,29 @@ class TennisCourtServiceTest {
 
     }
 
+    @Test
+    @DisplayName("테니스장 단건 조회")
+    void getTennisCourt() {
+        // given 테니스장 2개 등록
+        tennisCourtService.createTennisCourt(new TennisCourtReqForm(
+                "양평누리 테니스장", "서울시 영등포구", "http://test1.url"
+        ));
+        tennisCourtService.createTennisCourt(new TennisCourtReqForm(
+                "올림픽 테니스장", "서울시 강남구", "http://test2.url"
+        ));
+
+
+        // when
+        TennisCourtResponse tennisCourtResponse1 = tennisCourtService.getTennisCourt(1L);
+        TennisCourtResponse tennisCourtResponse2 = tennisCourtService.getTennisCourt(2L);
+
+
+        // then
+        assertThat(tennisCourtResponse1.name()).isEqualTo("양평누리 테니스장");
+        assertThat(tennisCourtResponse2.name()).isEqualTo("올림픽 테니스장");
+
+    }
+
 
 
 }

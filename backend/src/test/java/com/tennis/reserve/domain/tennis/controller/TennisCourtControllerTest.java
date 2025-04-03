@@ -146,7 +146,7 @@ class TennisCourtControllerTest {
     }
 
     @Test
-    @DisplayName("테니스장 목록 조회 성공 - 유저가 생성")
+    @DisplayName("테니스장 목록 조회 성공 - 유저가 조회")
     void getList() throws Exception {
         // given
         String name = "잠실올림픽코트";
@@ -173,5 +173,56 @@ class TennisCourtControllerTest {
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data.length()").value(2))
                 .andExpect(jsonPath("$.data[1].name").value(name2));
+    }
+
+    @Test
+    @DisplayName("테니스장 단건 조회 성공 - 유저가 조회")
+    void getTennisCourt1() throws Exception {
+        // given
+        String name = "잠실올림픽코트";
+        String location = "서울 송파구";
+        String imageUrl = "http://image1.url";
+        createTennisCourtRequest(name, location, imageUrl);
+
+        String name2 = "양재한강코트";
+        String location2 = "서울 강남구";
+        String imageUrl2 = "http://image2.url";
+        createTennisCourtRequest(name2, location2, imageUrl2);
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{id}", 2L)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(handler().handlerType(TennisCourtController.class))
+                .andExpect(handler().methodName("getTennisCourt"))
+                .andExpect(jsonPath("$.code").value("200-5"))
+                .andExpect(jsonPath("$.message").value(name2 + " 조회하였습니다."))
+                .andExpect(jsonPath("$.data.name").value(name2))
+                .andExpect(jsonPath("$.data.location").value(location2))
+                .andExpect(jsonPath("$.data.imageUrl").value(imageUrl2));
+    }
+
+
+    @Test
+    @DisplayName("테니스장 단건 조회 실패 - 없는 데이터")
+    void getTennisCourt2() throws Exception {
+        // given
+        String name = "잠실올림픽코트";
+        String location = "서울 송파구";
+        String imageUrl = "http://image1.url";
+        createTennisCourtRequest(name, location, imageUrl);
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{id}", 2L)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
+
+        // then
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404-1"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 테니스장입니다."));
     }
 }
