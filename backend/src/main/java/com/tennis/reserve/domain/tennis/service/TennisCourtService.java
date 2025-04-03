@@ -74,4 +74,12 @@ public class TennisCourtService {
 
         return TennisCourtSimpleResponse.fromEntity(tennisCourt);
     }
+
+    @Transactional
+    public void deleteTennisCourt(Long id) {
+        TennisCourt tennisCourt = tennisCourtRepository.findById(id)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 테니스장입니다."));
+
+        tennisCourtRepository.delete(tennisCourt);
+    }
 }

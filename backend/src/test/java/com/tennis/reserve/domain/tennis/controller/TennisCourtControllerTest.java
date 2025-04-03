@@ -291,4 +291,44 @@ class TennisCourtControllerTest {
                 .andExpect(jsonPath("$.message", containsString("위치는 공백일 수 없습니다.")))
                 .andExpect(jsonPath("$.message", containsString("이미지 URL은 공백일 수 없습니다.")));
     }
+
+    // "200-7", "해당 테니스장을 삭제하였습니다."
+
+    @Test
+    @DisplayName("테니스장 삭제 성공 - 관리자가 삭제")
+    void delete1() throws Exception {
+        // given
+        String name = "잠실올림픽코트";
+        String location = "서울 송파구";
+        String imageUrl = "http://image.url";
+        ResultActions tennisCourtRequest = createTennisCourtRequest(name, location, imageUrl, adminAccessToken);
+        String response = tennisCourtRequest.andReturn().getResponse().getContentAsString();
+        Long courtId = ((Number) JsonPath.read(response, "$.data.id")).longValue();
+
+        // when
+        ResultActions result = mvc.perform(delete("/api/tennis-courts/{id}", courtId)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andDo(print());
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(handler().handlerType(TennisCourtController.class))
+                .andExpect(handler().methodName("deleteTennisCourt"))
+                .andExpect(jsonPath("$.code").value("200-7"))
+                .andExpect(jsonPath("$.message").value("해당 테니스장을 삭제하였습니다."));
+    }
+
+    @Test
+    @DisplayName("테니스장 삭제 실패 - 존재하지 않는 테니스장")
+    void delete2() throws Exception {
+        // when
+        ResultActions result = mvc.perform(delete("/api/tennis-courts/{id}", 999L)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andDo(print());
+
+        // then
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404-1"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 테니스장입니다."));
+    }
 }

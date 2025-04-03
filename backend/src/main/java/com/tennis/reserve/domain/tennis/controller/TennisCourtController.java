@@ -76,4 +76,15 @@ public class TennisCourtController {
         );
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public RsData<Void> deleteTennisCourt(@PathVariable Long id) {
+        tennisCourtService.deleteTennisCourt(id);
+
+        return new RsData<>(
+                "200-7",
+                "해당 테니스장을 삭제하였습니다."
+        );
+    }
+
 }
