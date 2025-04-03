@@ -1,7 +1,9 @@
 package com.tennis.reserve.domain.tennis.controller;
 
+import com.tennis.reserve.domain.tennis.dto.request.TennisCourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.TennisCourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.TennisCourtSimpleResponse;
 import com.tennis.reserve.domain.tennis.service.TennisCourtService;
 import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
@@ -55,6 +57,21 @@ public class TennisCourtController {
         return new RsData<>(
                 "200-5",
                 "%s 조회하였습니다.".formatted(tennisCourtResponse.name()),
+                tennisCourtResponse
+        );
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public RsData<TennisCourtSimpleResponse> modifyTennisCourt(
+            @RequestBody @Valid TennisCourtModifyReqForm modifyReqForm,
+            @PathVariable Long id
+    ) {
+        TennisCourtSimpleResponse tennisCourtResponse = tennisCourtService.modifyTennisCourt(modifyReqForm, id);
+
+        return new RsData<>(
+                "200-6",
+                "%s 수정하였습니다.".formatted(tennisCourtResponse.name()),
                 tennisCourtResponse
         );
     }

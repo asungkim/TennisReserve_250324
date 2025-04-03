@@ -1,7 +1,9 @@
 package com.tennis.reserve.domain.tennis.service;
 
+import com.tennis.reserve.domain.tennis.dto.request.TennisCourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.TennisCourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.TennisCourtSimpleResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,17 +64,17 @@ class TennisCourtServiceTest {
     @DisplayName("테니스장 단건 조회")
     void getTennisCourt() {
         // given 테니스장 2개 등록
-        tennisCourtService.createTennisCourt(new TennisCourtReqForm(
+        TennisCourtResponse t1 = tennisCourtService.createTennisCourt(new TennisCourtReqForm(
                 "양평누리 테니스장", "서울시 영등포구", "http://test1.url"
         ));
-        tennisCourtService.createTennisCourt(new TennisCourtReqForm(
+        TennisCourtResponse t2 = tennisCourtService.createTennisCourt(new TennisCourtReqForm(
                 "올림픽 테니스장", "서울시 강남구", "http://test2.url"
         ));
 
 
         // when
-        TennisCourtResponse tennisCourtResponse1 = tennisCourtService.getTennisCourt(1L);
-        TennisCourtResponse tennisCourtResponse2 = tennisCourtService.getTennisCourt(2L);
+        TennisCourtResponse tennisCourtResponse1 = tennisCourtService.getTennisCourt(t1.id());
+        TennisCourtResponse tennisCourtResponse2 = tennisCourtService.getTennisCourt(t2.id());
 
 
         // then
@@ -81,6 +83,29 @@ class TennisCourtServiceTest {
 
     }
 
+    @Test
+    @DisplayName("테니스장 정보 수정")
+    void modify() {
+        // given 테니스장 등록
+        TennisCourtResponse prevResponse = tennisCourtService.createTennisCourt(new TennisCourtReqForm(
+                "양평누리 테니스장", "서울시 영등포구", "http://test1.url"
+        ));
+
+
+        // when 수정하면
+        TennisCourtModifyReqForm modifyReqForm =
+                new TennisCourtModifyReqForm("목동 테니스장", "서울시 양천구", "http://modify.url");
+        TennisCourtSimpleResponse nextResponse = tennisCourtService.modifyTennisCourt(modifyReqForm, prevResponse.id());
+
+
+        // then
+        assertThat(prevResponse.name()).isEqualTo("양평누리 테니스장");
+        assertThat(prevResponse.location()).isEqualTo("서울시 영등포구");
+        assertThat(prevResponse.imageUrl()).isEqualTo("http://test1.url");
+        assertThat(nextResponse.name()).isEqualTo("목동 테니스장");
+        assertThat(nextResponse.location()).isEqualTo("서울시 양천구");
+        assertThat(nextResponse.imageUrl()).isEqualTo("http://modify.url");
+    }
 
 
 }

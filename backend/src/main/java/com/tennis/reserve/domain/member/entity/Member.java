@@ -77,8 +77,11 @@ public class Member extends BaseTime {
 
         if (isAdmin()) {
             authorities.add("ROLE_ADMIN");
+            authorities.add("ROLE_MANAGER");
+            authorities.add("ROLE_USER");
         } else if (isManager()) {
             authorities.add("ROLE_MANAGER");
+            authorities.add("ROLE_USER");
         } else authorities.add("ROLE_USER");
 
         return authorities;

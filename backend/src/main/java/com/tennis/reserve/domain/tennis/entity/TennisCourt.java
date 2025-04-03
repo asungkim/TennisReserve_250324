@@ -41,4 +41,10 @@ public class TennisCourt extends BaseEntity {
         courts.add(court);
         court.setTennisCourt(this);
     }
+
+    public void update(String name, String location, String imageUrl) {
+        if (name != null) this.name = name;
+        if (location != null) this.location = location;
+        if (imageUrl != null) this.imageUrl = imageUrl;
+    }
 }

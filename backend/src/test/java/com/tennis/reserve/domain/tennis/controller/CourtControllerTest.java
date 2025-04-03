@@ -1,5 +1,12 @@
 package com.tennis.reserve.domain.tennis.controller;
 
+import com.tennis.reserve.domain.member.dto.request.JoinReqForm;
+import com.tennis.reserve.domain.member.dto.request.LoginReqForm;
+import com.tennis.reserve.domain.member.dto.response.LoginResBody;
+import com.tennis.reserve.domain.member.dto.response.MemberResBody;
+import com.tennis.reserve.domain.member.entity.Member;
+import com.tennis.reserve.domain.member.repository.MemberRepository;
+import com.tennis.reserve.domain.member.service.MemberService;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
 import com.tennis.reserve.domain.tennis.service.CourtService;
 import com.tennis.reserve.domain.tennis.service.TennisCourtService;
@@ -10,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,18 +44,44 @@ class CourtControllerTest {
     private TennisCourtService tennisCourtService;
 
     @Autowired
+    private MemberService memberService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+
+    @Autowired
     private CourtService courtService;
 
     private Long tennisCourtId;
 
+    private String adminAccessToken;
+    private String userAccessToken;
+
     @BeforeEach
     void setUp() {
+        // 회원가입 후 로그인(일반 회원)
+        MemberResBody member = memberService.createMember(new JoinReqForm("user1", "!password1", "userNick", "user1@exam.com"));
+        LoginResBody loginResBody = memberService.loginMember(new LoginReqForm("user1", "!password1"));
+        userAccessToken = loginResBody.accessToken();
+
+        // 회원가입 후 로그인(어드민)
+        Member admin = Member.createAdmin();
+        admin.encodePassword(passwordEncoder);
+        memberRepository.save(admin);
+        LoginResBody adminLogin = memberService.loginMember(new LoginReqForm("admin", "!password1"));
+        adminAccessToken = adminLogin.accessToken();
+
+
         tennisCourtId = tennisCourtService.createTennisCourt(new TennisCourtReqForm(
                 "양평누리 테니스장", "서울시 영등포구", "http://test1.url"
         )).id();
     }
 
-    private ResultActions createCourtRequest(String courtCode, String surfaceType, String environment, Long tennisCourtId) throws Exception {
+    private ResultActions createCourtRequest(String courtCode, String surfaceType, String environment, Long tennisCourtId, String token) throws Exception {
         return mvc.perform(post("/api/courts")
                         .content("""
                                 {
@@ -58,6 +92,7 @@ class CourtControllerTest {
                                 }
                                 """.formatted(courtCode, surfaceType, environment, tennisCourtId).stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .header("Authorization", "Bearer " + token)
                 )
                 .andDo(print());
     }
@@ -66,7 +101,7 @@ class CourtControllerTest {
     @DisplayName("코트 등록 성공")
     void create1() throws Exception {
         // when
-        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", tennisCourtId);
+        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", tennisCourtId, adminAccessToken);
 
 
         // then
@@ -82,10 +117,10 @@ class CourtControllerTest {
     @DisplayName("코트 등록 실패 - 해당 테니스장에 이미 있는 코트 코드")
     void create2() throws Exception {
         // given
-        createCourtRequest("A", "HARD", "INDOOR", tennisCourtId);
+        createCourtRequest("A", "HARD", "INDOOR", tennisCourtId, adminAccessToken);
 
         // when 이미 A 코드가 있으면
-        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", tennisCourtId);
+        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", tennisCourtId, adminAccessToken);
 
 
         // then
@@ -107,7 +142,9 @@ class CourtControllerTest {
                                 }
                                 """
                                 .stripIndent())
-                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .header("Authorization", "Bearer " + adminAccessToken))
+
                 .andDo(print());
 
         // then
