@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -49,5 +51,43 @@ class CourtServiceTest {
         assertThat(courtResponse.courtCode()).isEqualTo("A");
         assertThat(courtResponse.surfaceType()).isEqualTo("HARD");
         assertThat(courtResponse.tennisCourtId()).isEqualTo(tennisCourtId);
+    }
+
+    @Test
+    @DisplayName("테니스 코트 다건 조회")
+    void getCourts() {
+        // given
+        courtService.createCourt(new CourtReqForm("A", SurfaceType.HARD, Environment.OUTDOOR), tennisCourtId);
+        courtService.createCourt(new CourtReqForm("B", SurfaceType.CLAY, Environment.INDOOR), tennisCourtId);
+
+        // when
+        List<CourtResponse> courts = courtService.getCourts(tennisCourtId);
+
+
+        // then
+        assertThat(courts).hasSize(2);
+        assertThat(courts).extracting("courtCode")
+                .containsExactlyInAnyOrder("A", "B");
+        assertThat(courts.get(0).tennisCourtId()).isEqualTo(tennisCourtId);
+        assertThat(courts.get(0).timeSlots()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("테니스 코트 단건 조회")
+    void getCourt() {
+        // given
+        CourtResponse savedCourt = courtService.createCourt(
+                new CourtReqForm("C", SurfaceType.HARD, Environment.OUTDOOR),
+                tennisCourtId
+        );
+
+        // when
+        CourtResponse foundCourt = courtService.getCourt(tennisCourtId, savedCourt.id());
+
+
+        // then
+        assertThat(foundCourt.id()).isEqualTo(savedCourt.id());
+        assertThat(foundCourt.courtCode()).isEqualTo("C");
+        assertThat(foundCourt.surfaceType()).isEqualTo("HARD");
     }
 }

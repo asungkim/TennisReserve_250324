@@ -23,7 +23,7 @@ public class CourtService {
     // TODO : 코트 등록, 수정, 삭제
 
     @Transactional
-    public CourtResponse createCourt(CourtReqForm courtReqForm,Long tennisCourtId) {
+    public CourtResponse createCourt(CourtReqForm courtReqForm, Long tennisCourtId) {
 
         // 검증 -> 해당 테니스장의 이미 같은 courtCode가 있는지 검증
         validateDuplicateCourtCode(courtReqForm.courtCode(), tennisCourtId);
@@ -59,10 +59,19 @@ public class CourtService {
         );
     }
 
-    public List<CourtResponse> getCourts() {
-        return courtRepository.findAll()
-                .stream()
-                .map(CourtResponse::fromEntity)
-                .toList();
+    public List<CourtResponse> getCourts(Long tennisCourtId) {
+        List<Court> courts = courtRepository.findByTennisCourtId(tennisCourtId).orElseThrow(
+                () -> new ServiceException("404-1", "해당 테니스장을 찾을 수 없습니다.")
+        );
+
+        return courts.stream().map(CourtResponse::fromEntity).toList();
+    }
+
+    public CourtResponse getCourt(Long tennisCourtId, Long id) {
+        Court court = courtRepository.findByTennisCourtIdAndId(tennisCourtId, id).orElseThrow(
+                () -> new ServiceException("404-1", "해당 테니스장 또는 코트를 찾을 수 없습니다.")
+        );
+
+        return CourtResponse.fromEntity(court);
     }
 }
