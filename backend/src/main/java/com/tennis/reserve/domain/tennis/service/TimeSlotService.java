@@ -20,12 +20,12 @@ public class TimeSlotService {
     private final CourtService courtService;
 
     @Transactional
-    public TimeSlotResponse createTimeSlot(TimeSlotReqForm timeSlotReqForm) {
+    public TimeSlotResponse createTimeSlot(TimeSlotReqForm timeSlotReqForm, Long courtId) {
 
         // 검증 -> 해당 코트에 이미 겹치는 시간대가 등록되어있는지
-        validateDuplicateTimeSlot(timeSlotReqForm);
+        validateDuplicateTimeSlot(timeSlotReqForm, courtId);
 
-        Court court = courtService.findById(timeSlotReqForm.courtId());
+        Court court = courtService.findById(courtId);
 
         TimeSlot timeSlot = TimeSlot.builder()
                 .startTime(timeSlotReqForm.startTime())
@@ -39,8 +39,8 @@ public class TimeSlotService {
         return TimeSlotResponse.fromEntity(timeSlot);
     }
 
-    private void validateDuplicateTimeSlot(TimeSlotReqForm timeSlotReqForm) {
-        Court court = courtService.findById(timeSlotReqForm.courtId());
+    private void validateDuplicateTimeSlot(TimeSlotReqForm timeSlotReqForm, Long courtId) {
+        Court court = courtService.findById(courtId);
         LocalDateTime newStart = timeSlotReqForm.startTime();
         LocalDateTime newEnd = timeSlotReqForm.endTime();
 

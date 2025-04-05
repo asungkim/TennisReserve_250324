@@ -81,16 +81,15 @@ class CourtControllerTest {
         )).id();
     }
 
-    private ResultActions createCourtRequest(String courtCode, String surfaceType, String environment, Long tennisCourtId, String token) throws Exception {
-        return mvc.perform(post("/api/courts")
+    private ResultActions createCourtRequest(String courtCode, String surfaceType, String environment, String token) throws Exception {
+        return mvc.perform(post("/api/tennis-courts/%d/courts".formatted(tennisCourtId))
                         .content("""
                                 {
                                     "courtCode": "%s",
                                     "surfaceType": "%s",
-                                    "environment": "%s",
-                                    "tennisCourtId": %d
+                                    "environment": "%s"
                                 }
-                                """.formatted(courtCode, surfaceType, environment, tennisCourtId).stripIndent())
+                                """.formatted(courtCode, surfaceType, environment).stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .header("Authorization", "Bearer " + token)
                 )
@@ -101,7 +100,7 @@ class CourtControllerTest {
     @DisplayName("코트 등록 성공")
     void create1() throws Exception {
         // when
-        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", tennisCourtId, adminAccessToken);
+        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", adminAccessToken);
 
 
         // then
@@ -117,10 +116,10 @@ class CourtControllerTest {
     @DisplayName("코트 등록 실패 - 해당 테니스장에 이미 있는 코트 코드")
     void create2() throws Exception {
         // given
-        createCourtRequest("A", "HARD", "INDOOR", tennisCourtId, adminAccessToken);
+        createCourtRequest("A", "HARD", "INDOOR", adminAccessToken);
 
         // when 이미 A 코드가 있으면
-        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", tennisCourtId, adminAccessToken);
+        ResultActions result = createCourtRequest("A", "GRASS", "OUTDOOR", adminAccessToken);
 
 
         // then
@@ -135,7 +134,7 @@ class CourtControllerTest {
     @DisplayName("코트 등록 실패 - 필수 입력값 누락")
     void create3() throws Exception {
         // given,when
-        ResultActions result = mvc.perform(post("/api/courts")
+        ResultActions result = mvc.perform(post("/api/tennis-courts/%d/courts".formatted(tennisCourtId))
                         .content("""
                                 {
                                     "courtCode": ""
@@ -152,8 +151,8 @@ class CourtControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", containsString("코트 코드는 필수 입력값입니다.")))
                 .andExpect(jsonPath("$.message", containsString("표면 종류(SurfaceType)는 필수 입력값입니다.")))
-                .andExpect(jsonPath("$.message", containsString("환경(Environment)은 필수 입력값입니다.")))
-                .andExpect(jsonPath("$.message", containsString("테니스장 ID는 필수 입력값입니다.")));
+                .andExpect(jsonPath("$.message", containsString("환경(Environment)은 필수 입력값입니다.")));
+
 
     }
 

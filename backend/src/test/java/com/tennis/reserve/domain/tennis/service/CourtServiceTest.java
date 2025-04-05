@@ -40,13 +40,14 @@ class CourtServiceTest {
     void create() {
         // given
         CourtReqForm courtReqForm =
-                new CourtReqForm("A", SurfaceType.HARD, Environment.OUTDOOR, tennisCourtId);
+                new CourtReqForm("A", SurfaceType.HARD, Environment.OUTDOOR);
 
         // when
-        CourtResponse courtResponse = courtService.createCourt(courtReqForm);
+        CourtResponse courtResponse = courtService.createCourt(courtReqForm, tennisCourtId);
 
         // then
         assertThat(courtResponse.courtCode()).isEqualTo("A");
         assertThat(courtResponse.surfaceType()).isEqualTo("HARD");
+        assertThat(courtResponse.tennisCourtId()).isEqualTo(tennisCourtId);
     }
 }

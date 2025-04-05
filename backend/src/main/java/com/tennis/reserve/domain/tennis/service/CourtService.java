@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,12 +23,13 @@ public class CourtService {
     // TODO : 코트 등록, 수정, 삭제
 
     @Transactional
-    public CourtResponse createCourt(CourtReqForm courtReqForm) {
+    public CourtResponse createCourt(CourtReqForm courtReqForm,Long tennisCourtId) {
 
         // 검증 -> 해당 테니스장의 이미 같은 courtCode가 있는지 검증
-        validateDuplicateCourtCode(courtReqForm.courtCode(), courtReqForm.tennisCourtId());
+        validateDuplicateCourtCode(courtReqForm.courtCode(), tennisCourtId);
 
-        TennisCourt tennisCourt = tennisCourtService.findById(courtReqForm.tennisCourtId());
+        // 테니스장 존재 검증 및 정보 가져오기
+        TennisCourt tennisCourt = tennisCourtService.findById(tennisCourtId);
 
         Court court = Court.builder()
                 .courtCode(courtReqForm.courtCode())
@@ -55,5 +57,12 @@ public class CourtService {
         return courtRepository.findById(id).orElseThrow(
                 () -> new ServiceException("404-2", "해당 코트는 존재하지 않습니다.")
         );
+    }
+
+    public List<CourtResponse> getCourts() {
+        return courtRepository.findAll()
+                .stream()
+                .map(CourtResponse::fromEntity)
+                .toList();
     }
 }

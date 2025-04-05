@@ -59,7 +59,9 @@ class TimeSlotControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    private Long savedCourtId;
+    private Long tennisCourtId;
+    private Long courtId;
+
     private String userAccessToken;
     private String adminAccessToken;
 
@@ -78,19 +80,20 @@ class TimeSlotControllerTest {
         adminAccessToken = adminLogin.accessToken();
 
         TennisCourtResponse tennisCourtResponse = tennisCourtService.createTennisCourt(new TennisCourtReqForm("서초구 테니스장", "서울 서초구", "http://image.url"));
-        CourtResponse courtResponse = courtService.createCourt(new CourtReqForm("A코트", SurfaceType.HARD, Environment.OUTDOOR, tennisCourtResponse.id()));
-        savedCourtId = courtResponse.id();
+        tennisCourtId = tennisCourtResponse.id();
+
+        CourtResponse courtResponse = courtService.createCourt(new CourtReqForm("A코트", SurfaceType.HARD, Environment.OUTDOOR), tennisCourtResponse.id());
+        courtId = courtResponse.id();
     }
 
-    private ResultActions createTimeSlotRequest(Long courtId, String startTime, String endTime, String token) throws Exception {
-        return mvc.perform(post("/api/time-slots")
+    private ResultActions createTimeSlotRequest(String startTime, String endTime, String token) throws Exception {
+        return mvc.perform(post("/api/tennis-courts/%d/courts/%d/time-slots".formatted(tennisCourtId, courtId))
                         .content("""
                                     {
-                                        "courtId": %d,
                                         "startTime": "%s",
                                         "endTime": "%s"
                                     }
-                                """.formatted(courtId, startTime, endTime).stripIndent())
+                                """.formatted(startTime, endTime).stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .header("Authorization", "Bearer " + token)
                 )
@@ -103,7 +106,7 @@ class TimeSlotControllerTest {
         String start = "2025-04-01T10:00:00";
         String end = "2025-04-01T12:00:00";
 
-        ResultActions result = createTimeSlotRequest(savedCourtId, start, end, adminAccessToken);
+        ResultActions result = createTimeSlotRequest(start, end, adminAccessToken);
 
         result
                 .andExpect(status().isOk())
@@ -123,7 +126,7 @@ class TimeSlotControllerTest {
                     }
                 """;
 
-        ResultActions result = mvc.perform(post("/api/time-slots")
+        ResultActions result = mvc.perform(post("/api/tennis-courts/%d/courts/%d/time-slots".formatted(tennisCourtId, courtId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson)
                         .header("Authorization", "Bearer " + adminAccessToken))
@@ -132,7 +135,6 @@ class TimeSlotControllerTest {
         result
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400-1"))
-                .andExpect(jsonPath("$.message", containsString("코트 ID는 필수 입력값입니다.")))
                 .andExpect(jsonPath("$.message", containsString("시작 시간은 필수 입력값입니다.")))
                 .andExpect(jsonPath("$.message", containsString("종료 시간은 필수 입력값입니다.")));
     }
@@ -143,11 +145,11 @@ class TimeSlotControllerTest {
         // given
         String start = "2025-04-01T10:00:00";
         String end = "2025-04-01T12:00:00";
-        createTimeSlotRequest(savedCourtId, start, end, adminAccessToken);
+        createTimeSlotRequest(start, end, adminAccessToken);
 
         // 동일 시간대 다시 등록
         String start2 = "2025-04-01T11:00:00";
-        ResultActions result = createTimeSlotRequest(savedCourtId, start2, end, adminAccessToken);
+        ResultActions result = createTimeSlotRequest(start2, end, adminAccessToken);
 
         result
                 .andExpect(status().isConflict())

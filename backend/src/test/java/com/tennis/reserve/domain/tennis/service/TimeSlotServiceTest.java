@@ -40,7 +40,7 @@ class TimeSlotServiceTest {
                 "양평누리 테니스장", "서울시 영등포구", "http://test1.url"
         )).id();
 
-        courtId = courtService.createCourt(new CourtReqForm("A", SurfaceType.HARD, Environment.OUTDOOR, tennisCourtId)).id();
+        courtId = courtService.createCourt(new CourtReqForm("A", SurfaceType.HARD, Environment.OUTDOOR),tennisCourtId).id();
     }
 
     @Test
@@ -49,10 +49,10 @@ class TimeSlotServiceTest {
         // given
         LocalDateTime start = LocalDateTime.of(2025, 4, 1, 10, 0);
         LocalDateTime end = LocalDateTime.of(2025, 4, 1, 12, 0);
-        TimeSlotReqForm timeSlotReqForm = new TimeSlotReqForm(courtId, start, end);
+        TimeSlotReqForm timeSlotReqForm = new TimeSlotReqForm(start, end);
 
         // when
-        TimeSlotResponse timeSlotResponse = timeSlotService.createTimeSlot(timeSlotReqForm);
+        TimeSlotResponse timeSlotResponse = timeSlotService.createTimeSlot(timeSlotReqForm,courtId);
 
         // then
         assertThat(timeSlotResponse.startTime()).isEqualTo(start);

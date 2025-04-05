@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record TimeSlotReqForm(
-        @NotNull(message = "코트 ID는 필수 입력값입니다.")
-        Long courtId,
 
         @NotNull(message = "시작 시간은 필수 입력값입니다.")
         LocalDateTime startTime,

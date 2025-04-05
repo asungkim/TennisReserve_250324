@@ -35,6 +35,7 @@ public class TennisCourt extends BaseEntity {
     private List<Court> courts = new ArrayList<>();
 
     @OneToMany(mappedBy = "tennisCourt", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<TennisCourtManager> managers = new ArrayList<>();
 
     public void addCourt(Court court) {

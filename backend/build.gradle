@@ -39,8 +39,9 @@ dependencies {
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	testImplementation 'org.testcontainers:junit-jupiter:1.19.1'
-	testImplementation 'org.testcontainers:redis:1.19.1'
+	testImplementation 'org.testcontainers:junit-jupiter:1.18.3'
+	testImplementation "org.testcontainers:testcontainers:1.17.6"
+	testImplementation "org.testcontainers:redis:1.17.6"
 
 	// jwt
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
