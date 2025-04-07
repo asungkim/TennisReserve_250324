@@ -1,5 +1,6 @@
 package com.tennis.reserve.domain.tennis.controller;
 
+import com.tennis.reserve.domain.tennis.dto.request.CourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
 import com.tennis.reserve.domain.tennis.service.CourtService;
@@ -52,7 +53,7 @@ public class CourtController {
     public RsData<CourtResponse> getCourt(
             @PathVariable Long tennisCourtId,
             @PathVariable Long id) {
-        CourtResponse courtResponse = courtService.getCourt(tennisCourtId,id);
+        CourtResponse courtResponse = courtService.getCourt(tennisCourtId, id);
 
         return new RsData<>(
                 "200-5",
@@ -61,29 +62,33 @@ public class CourtController {
         );
     }
 
-//    @PutMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public RsData<TennisCourtSimpleResponse> modifyTennisCourt(
-//            @RequestBody @Valid TennisCourtModifyReqForm modifyReqForm,
-//            @PathVariable Long id
-//    ) {
-//        TennisCourtSimpleResponse tennisCourtResponse = tennisCourtService.modifyTennisCourt(modifyReqForm, id);
-//
-//        return new RsData<>(
-//                "200-6",
-//                "%s 수정하였습니다.".formatted(tennisCourtResponse.name()),
-//                tennisCourtResponse
-//        );
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public RsData<Void> deleteTennisCourt(@PathVariable Long id) {
-//        tennisCourtService.deleteTennisCourt(id);
-//
-//        return new RsData<>(
-//                "200-7",
-//                "해당 테니스장을 삭제하였습니다."
-//        );
-//    }
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public RsData<CourtResponse> modifyTennisCourt(
+            @RequestBody @Valid CourtModifyReqForm modifyReqForm,
+            @PathVariable Long tennisCourtId,
+            @PathVariable Long id
+    ) {
+        CourtResponse courtResponse = courtService.modifyCourt(modifyReqForm, tennisCourtId, id);
+
+        return new RsData<>(
+                "200-6",
+                "%s 의 %s 코트를 수정하였습니다."
+                        .formatted(courtResponse.tennisCourtName(), courtResponse.courtCode()),
+                courtResponse
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public RsData<Void> deleteTennisCourt(
+            @PathVariable Long tennisCourtId,
+            @PathVariable Long id) {
+        String msg = courtService.deleteCourt(tennisCourtId, id);
+
+        return new RsData<>(
+                "200-7",
+                "%s 코트를 삭제하였습니다.".formatted(msg)
+        );
+    }
 }

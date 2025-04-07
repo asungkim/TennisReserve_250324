@@ -1,11 +1,15 @@
 package com.tennis.reserve.domain.tennis.service;
 
+import com.tennis.reserve.domain.tennis.dto.request.CourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
 import com.tennis.reserve.domain.tennis.entity.Court;
 import com.tennis.reserve.domain.tennis.entity.TennisCourt;
+import com.tennis.reserve.domain.tennis.enums.Environment;
+import com.tennis.reserve.domain.tennis.enums.SurfaceType;
 import com.tennis.reserve.domain.tennis.repository.CourtRepository;
 import com.tennis.reserve.global.exception.ServiceException;
+import com.tennis.reserve.global.standard.util.EnumConvertUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +35,23 @@ public class CourtService {
         // 테니스장 존재 검증 및 정보 가져오기
         TennisCourt tennisCourt = tennisCourtService.findById(tennisCourtId);
 
+        // courtReqForm에서 String 으로 받은 값을 enum으로 변경
+        SurfaceType surfaceType = EnumConvertUtil.convertOrThrow(
+                courtReqForm.surfaceType(),
+                SurfaceType.class,
+                "유효하지 않은 SurfaceType입니다."
+        );
+
+        Environment environment = EnumConvertUtil.convertOrThrow(
+                courtReqForm.environment(),
+                Environment.class,
+                "유효하지 않은 Environment입니다."
+        );
+
         Court court = Court.builder()
                 .courtCode(courtReqForm.courtCode())
-                .environment(courtReqForm.environment())
-                .surfaceType(courtReqForm.surfaceType())
+                .environment(environment)
+                .surfaceType(surfaceType)
                 .tennisCourt(tennisCourt)
                 .build();
 
@@ -73,5 +90,45 @@ public class CourtService {
         );
 
         return CourtResponse.fromEntity(court);
+    }
+
+    @Transactional
+    public CourtResponse modifyCourt(
+            CourtModifyReqForm modifyReqForm,
+            Long tennisCourtId,
+            Long id) {
+        Court court = courtRepository.findByTennisCourtIdAndId(tennisCourtId, id).orElseThrow(
+                () -> new ServiceException("404-1", "해당 테니스장 또는 코트를 찾을 수 없습니다.")
+        );
+
+        SurfaceType surfaceType = EnumConvertUtil.convertOrThrow(
+                modifyReqForm.surfaceType(),
+                SurfaceType.class,
+                "유효하지 않은 SurfaceType입니다."
+        );
+
+        Environment environment = EnumConvertUtil.convertOrThrow(
+                modifyReqForm.environment(),
+                Environment.class,
+                "유효하지 않은 Environment입니다."
+        );
+
+        court.update(modifyReqForm.courtCode(), environment, surfaceType);
+
+        return CourtResponse.fromEntity(court);
+    }
+
+    @Transactional
+    public String deleteCourt(Long tennisCourtId, Long id) {
+        Court court = courtRepository.findByTennisCourtIdAndId(tennisCourtId, id).orElseThrow(
+                () -> new ServiceException("404-1", "해당 테니스장 또는 코트를 찾을 수 없습니다.")
+        );
+
+        String courtCode = court.getCourtCode();
+        String tennisCourtName = court.getTennisCourt().getName();
+
+        courtRepository.delete(court);
+
+        return "%s 의 %s".formatted(tennisCourtName, courtCode);
     }
 }

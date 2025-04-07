@@ -11,8 +11,6 @@ import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
 import com.tennis.reserve.domain.tennis.dto.response.TennisCourtResponse;
-import com.tennis.reserve.domain.tennis.enums.Environment;
-import com.tennis.reserve.domain.tennis.enums.SurfaceType;
 import com.tennis.reserve.domain.tennis.service.CourtService;
 import com.tennis.reserve.domain.tennis.service.TennisCourtService;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +80,7 @@ class TimeSlotControllerTest {
         TennisCourtResponse tennisCourtResponse = tennisCourtService.createTennisCourt(new TennisCourtReqForm("서초구 테니스장", "서울 서초구", "http://image.url"));
         tennisCourtId = tennisCourtResponse.id();
 
-        CourtResponse courtResponse = courtService.createCourt(new CourtReqForm("A코트", SurfaceType.HARD, Environment.OUTDOOR), tennisCourtResponse.id());
+        CourtResponse courtResponse = courtService.createCourt(new CourtReqForm("A코트", "HARD", "OUTDOOR"), tennisCourtResponse.id());
         courtId = courtResponse.id();
     }
 

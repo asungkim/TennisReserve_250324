@@ -41,4 +41,10 @@ public class Court extends BaseEntity {
         timeSlots.add(timeSlot);
         timeSlot.setCourt(this);
     }
+
+    public void update(String courtCode, Environment environment, SurfaceType surfaceType) {
+        if (courtCode != null) this.courtCode = courtCode;
+        if (environment != null) this.environment = environment;
+        if (surfaceType != null) this.surfaceType = surfaceType;
+    }
 }

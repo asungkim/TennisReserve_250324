@@ -4,8 +4,6 @@ import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.TimeSlotResponse;
-import com.tennis.reserve.domain.tennis.enums.Environment;
-import com.tennis.reserve.domain.tennis.enums.SurfaceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +38,7 @@ class TimeSlotServiceTest {
                 "양평누리 테니스장", "서울시 영등포구", "http://test1.url"
         )).id();
 
-        courtId = courtService.createCourt(new CourtReqForm("A", SurfaceType.HARD, Environment.OUTDOOR),tennisCourtId).id();
+        courtId = courtService.createCourt(new CourtReqForm("A", "HARD", "OUTDOOR"),tennisCourtId).id();
     }
 
     @Test

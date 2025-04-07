@@ -12,6 +12,7 @@ public record CourtResponse(
         String surfaceType,
         String environment,
         Long tennisCourtId,
+        String tennisCourtName,
         List<TimeSlotResponse> timeSlots
 ) {
     public static CourtResponse fromEntity(Court court) {
@@ -21,6 +22,7 @@ public record CourtResponse(
                 .surfaceType(court.getSurfaceType().name())
                 .environment(court.getEnvironment().name())
                 .tennisCourtId(court.getTennisCourt().getId())
+                .tennisCourtName(court.getTennisCourt().getName())
                 .timeSlots(court.getTimeSlots()
                         .stream()
                         .map(TimeSlotResponse::fromEntity)

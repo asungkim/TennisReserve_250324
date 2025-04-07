@@ -7,7 +7,9 @@ import com.tennis.reserve.domain.member.dto.response.MemberResBody;
 import com.tennis.reserve.domain.member.entity.Member;
 import com.tennis.reserve.domain.member.repository.MemberRepository;
 import com.tennis.reserve.domain.member.service.MemberService;
+import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
+import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
 import com.tennis.reserve.domain.tennis.service.CourtService;
 import com.tennis.reserve.domain.tennis.service.TennisCourtService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -137,7 +140,9 @@ class CourtControllerTest {
         ResultActions result = mvc.perform(post("/api/tennis-courts/%d/courts".formatted(tennisCourtId))
                         .content("""
                                 {
-                                    "courtCode": ""
+                                    "courtCode": "",
+                                    "surfaceType": "",
+                                    "environment": ""
                                 }
                                 """
                                 .stripIndent())
@@ -154,6 +159,104 @@ class CourtControllerTest {
                 .andExpect(jsonPath("$.message", containsString("환경(Environment)은 필수 입력값입니다.")));
 
 
+    }
+
+    @Test
+    @DisplayName("코트 수정 성공")
+    void modify1() throws Exception {
+        // given
+        CourtResponse savedCourt = courtService.createCourt(
+                new CourtReqForm("A", "HARD", "OUTDOOR"),
+                tennisCourtId
+        );
+
+        // when
+        ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", tennisCourtId, savedCourt.id())
+                .content("""
+                    {
+                      "courtCode": "B",
+                      "surfaceType": "CLAY",
+                      "environment": "INDOOR"
+                    }
+                    """.stripIndent())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminAccessToken)
+        ).andDo(print());
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.courtCode").value("B"))
+                .andExpect(jsonPath("$.data.surfaceType").value("CLAY"))
+                .andExpect(jsonPath("$.data.environment").value("INDOOR"));
+    }
+
+    @Test
+    @DisplayName("코트 수정 실패 - 유효성 검증 실패")
+    void modify2() throws Exception {
+        // when
+        ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", tennisCourtId, 1L)
+                .content("""
+                    {
+                      "courtCode": "",
+                      "surfaceType": "",
+                      "environment": ""
+                    }
+                    """.stripIndent())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminAccessToken)
+        ).andDo(print());
+
+        // then
+        result
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("코트 코드는 필수 입력값입니다.")))
+                .andExpect(jsonPath("$.message", containsString("표면 종류(SurfaceType)는 필수 입력값입니다.")))
+                .andExpect(jsonPath("$.message", containsString("환경(Environment)은 필수 입력값입니다.")));
+    }
+
+    @Test
+    @DisplayName("코트 수정 실패 - 존재하지 않는 테니스장 ID")
+    void modify3() throws Exception {
+        // when
+        ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", 999L, 1L)
+                .content("""
+                    {
+                      "courtCode": "B",
+                      "surfaceType": "HARD",
+                      "environment": "OUTDOOR"
+                    }
+                    """.stripIndent())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminAccessToken)
+        ).andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", containsString("해당 테니스장 또는 코트를 찾을 수 없습니다.")));
+    }
+
+    @Test
+    @DisplayName("코트 수정 실패 - 존재하지 않는 코트 ID")
+    void modify4() throws Exception {
+        // when
+        ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", tennisCourtId, 9999L)
+                .content("""
+                    {
+                      "courtCode": "C",
+                      "surfaceType": "CLAY",
+                      "environment": "INDOOR"
+                    }
+                    """.stripIndent())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminAccessToken)
+        ).andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", containsString("해당 테니스장 또는 코트를 찾을 수 없습니다.")));
     }
 
 }

@@ -2,8 +2,7 @@ package com.tennis.reserve.domain.tennis.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record CourtReqForm(
-
+public record CourtModifyReqForm(
         @NotBlank(message = "코트 코드는 필수 입력값입니다.")
         String courtCode,
 
