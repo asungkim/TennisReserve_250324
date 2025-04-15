@@ -7,6 +7,8 @@ import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotListResponse;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
 import com.tennis.reserve.domain.tennis.enums.TimeSlotStatus;
+import com.tennis.reserve.domain.tennis.repository.TimeSlotRepository;
+import com.tennis.reserve.global.exception.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,6 +38,8 @@ class TimeSlotServiceTest {
 
     private Long courtId;
     private Long tennisCourtId;
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
 
     @BeforeEach
     void setUp() {
@@ -129,5 +134,29 @@ class TimeSlotServiceTest {
         assertThat(modified.startTime()).isEqualTo(newStart);
         assertThat(modified.endTime()).isEqualTo(newEnd);
         assertThat(modified.status()).isEqualTo(TimeSlotStatus.RESERVED);
+    }
+
+    @Test
+    @DisplayName("시간대 삭제")
+    void delete() {
+        // given
+        LocalTime start = LocalTime.of(10, 0);
+        LocalTime end = LocalTime.of(12, 0);
+        TimeSlotReqForm reqForm = new TimeSlotReqForm(start, end);
+
+        TimeSlotResponse created = timeSlotService.createTimeSlot(reqForm, courtId);
+
+        // when
+        String result = timeSlotService.deleteTimeSlot(tennisCourtId, courtId, created.id());
+
+        // then
+        assertThat(result).contains("양평누리 테니스장");
+        assertThat(result).contains("A");
+        assertThat(result).contains("10:00");
+        assertThat(result).contains("12:00");
+
+        assertThatThrownBy(() -> timeSlotService.findById(created.id()))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("해당 시간대는 존재하지 않습니다.");
     }
 }

@@ -103,4 +103,24 @@ public class TimeSlotService {
 
         return TimeSlotResponse.fromEntity(timeSlot);
     }
+
+    public String deleteTimeSlot(Long tennisCourtId, Long courtId, Long id) {
+        TimeSlot timeSlot = timeSlotRepository.findByCourt_TennisCourt_IdAndCourt_IdAndId(tennisCourtId, courtId, id)
+                .orElseThrow(() -> new ServiceException("404-2", "해당 시간대를 찾을 수 없습니다."));
+
+        String tennisCourtName = timeSlot.getCourt().getTennisCourt().getName();
+        String courtCode = timeSlot.getCourt().getCourtCode();
+        String start = timeSlot.getStartTime().toString();
+        String end = timeSlot.getEndTime().toString();
+
+        timeSlotRepository.delete(timeSlot);
+
+        return "%s|%s|%s|%s".formatted(tennisCourtName, courtCode, start, end);
+    }
+
+    public TimeSlot findById(Long id) {
+        return timeSlotRepository.findById(id).orElseThrow(
+                () -> new ServiceException("404-2", "해당 시간대는 존재하지 않습니다.")
+        );
+    }
 }

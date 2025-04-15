@@ -84,4 +84,21 @@ public class TimeSlotController {
                 res
         );
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public RsData<Void> deleteTimeSlot(
+            @PathVariable Long tennisCourtId,
+            @PathVariable Long courtId,
+            @PathVariable Long id
+    ) {
+        String msg = timeSlotService.deleteTimeSlot(tennisCourtId, courtId, id);
+
+        return new RsData<>(
+                "200-7",
+                "%s 의 %s 코트 시간대 %s ~ %s 를 삭제하였습니다.".formatted(
+                        msg.split("\\|")[0], msg.split("\\|")[1], msg.split("\\|")[2], msg.split("\\|")[3]
+                )
+        );
+    }
 }

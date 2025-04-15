@@ -13,8 +13,11 @@ import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.court.CourtResponse;
 import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtResponse;
+import com.tennis.reserve.domain.tennis.repository.TimeSlotRepository;
 import com.tennis.reserve.domain.tennis.service.CourtService;
 import com.tennis.reserve.domain.tennis.service.TennisCourtService;
+import com.tennis.reserve.domain.tennis.service.TimeSlotService;
+import com.tennis.reserve.global.exception.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -69,6 +73,10 @@ class TimeSlotControllerTest {
 
     private String userAccessToken;
     private String adminAccessToken;
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
+    @Autowired
+    private TimeSlotService timeSlotService;
 
     @BeforeEach
     void setUp() {
@@ -281,8 +289,6 @@ class TimeSlotControllerTest {
     }
 
 
-
-
     @Test
     @DisplayName("시간대 수정 성공 - status 포함")
     void modify1() throws Exception {
@@ -415,5 +421,52 @@ class TimeSlotControllerTest {
                 .andExpect(jsonPath("$.message").value("유효하지 않은 TimeStatus입니다. (입력값: WRONG_STATUS)"));
     }
 
+    @Transactional
+    boolean isExist(Long id) {
+        return timeSlotRepository.existsById(id);
+    }
 
+    @Test
+    @DisplayName("시간대 삭제 성공")
+    void delete1() throws Exception {
+        // given
+        String start = "10:00:00";
+        String end = "12:00:00";
+        MvcResult result = createTimeSlotRequest(start, end, adminAccessToken)
+                .andReturn();
+
+        // 응답에서 ID 추출
+        Long timeSlotId = extractTimeSlotId(result);
+
+        // when - 삭제
+        ResultActions deleteResult = mvc.perform(delete("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}", tennisCourtId, courtId, timeSlotId)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andDo(print());
+
+        // then - 삭제 응답 확인
+        deleteResult
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-7"))
+                .andExpect(jsonPath("$.message").value(containsString("양평누리 테니스장 의 A 코트 시간대 10:00 ~ 12:00 를 삭제하였습니다.")));
+
+
+        assertThatThrownBy(() -> timeSlotService.findById(timeSlotId))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("해당 시간대는 존재하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("시간대 삭제 실패 - 존재하지 않는 ID")
+    void delete2() throws Exception {
+        // when
+        ResultActions result = mvc.perform(delete("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}", tennisCourtId, courtId, 9999L)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404-2"))
+                .andExpect(jsonPath("$.message").value("해당 시간대를 찾을 수 없습니다."));
+    }
 }
