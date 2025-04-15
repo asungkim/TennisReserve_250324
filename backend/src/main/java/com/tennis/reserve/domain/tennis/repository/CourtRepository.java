@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface CourtRepository extends JpaRepository<Court, Long> {
-    Optional<List<Court>> findByTennisCourtId(Long tennisCourtId);
+    List<Court> findByTennisCourtId(Long tennisCourtId);
 
     Optional<Court> findByTennisCourtIdAndId(Long tennisCourtId, Long id);
 }

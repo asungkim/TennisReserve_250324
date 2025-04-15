@@ -80,9 +80,7 @@ public class CourtService {
     }
 
     public CourtListResponse getCourts(Long tennisCourtId) {
-        List<Court> courts = courtRepository.findByTennisCourtId(tennisCourtId).orElseThrow(
-                () -> new ServiceException("404-1", "해당 테니스장을 찾을 수 없습니다.")
-        );
+        List<Court> courts = courtRepository.findByTennisCourtId(tennisCourtId);
 
         TennisCourtResponse tennisCourtRes = tennisCourtService.getTennisCourt(tennisCourtId);
         List<CourtItem> courtItemRes = courts.stream().map(CourtItem::fromEntity).toList();

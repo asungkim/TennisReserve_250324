@@ -46,8 +46,6 @@ public class TennisCourtController {
         );
     }
 
-    // TODO : 단건 조회, 수정, 삭제
-
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('USER')")

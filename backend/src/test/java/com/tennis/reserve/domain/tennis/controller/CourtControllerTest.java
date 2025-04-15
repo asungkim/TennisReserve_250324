@@ -28,8 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -162,7 +161,89 @@ class CourtControllerTest {
     }
 
 
-    // TODO : 코트 목록 조회, 단건 조회, 삭제
+    @Test
+    @DisplayName("코트 목록 조회 성공 - 유저 조회")
+    void list1() throws Exception {
+        // given
+        createCourtRequest("A", "GRASS", "OUTDOOR", adminAccessToken);
+        createCourtRequest("B", "HARD", "INDOOR", adminAccessToken);
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts", tennisCourtId)
+                        .header("Authorization", "Bearer " + userAccessToken)
+                )
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-4"))
+                .andExpect(jsonPath("$.message").value(containsString("양평누리 테니스장의 코트 목록을 조회하였습니다.")))
+                .andExpect(jsonPath("$.data.tennisCourtId").value(tennisCourtId))
+                .andExpect(jsonPath("$.data.tennisCourtName").value("양평누리 테니스장"))
+                .andExpect(jsonPath("$.data.courtList").isArray())
+                .andExpect(jsonPath("$.data.courtList.length()").value(2))
+                .andExpect(jsonPath("$.data.courtList[0].courtCode").value("A"))
+                .andExpect(jsonPath("$.data.courtList[1].courtCode").value("B"));
+    }
+
+    @Test
+    @DisplayName("코트 목록 조회 실패 - 존재하지 않는 테니스장 ID")
+    void list2() throws Exception {
+        // given
+        Long invalidTennisCourtId = 9999L;
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts", invalidTennisCourtId)
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404-1"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 테니스장입니다."));
+    }
+
+    @Test
+    @DisplayName("코트 단건 조회 성공")
+    void get1() throws Exception {
+        // given
+        CourtResponse savedCourt = courtService.createCourt(
+                new CourtReqForm("A", "HARD", "OUTDOOR"),
+                tennisCourtId
+        );
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts/{id}",
+                        tennisCourtId, savedCourt.id())
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(containsString("양평누리 테니스장 의 A 코트를 조회하였습니다.")))
+                .andExpect(jsonPath("$.code").value("200-5"))
+                .andExpect(jsonPath("$.data.courtCode").value("A"))
+                .andExpect(jsonPath("$.data.tennisCourtId").value(tennisCourtId));
+    }
+
+    @Test
+    @DisplayName("코트 단건 조회 실패 - 존재하지 않는 테니스장 or 코트 ID")
+    void get2() throws Exception {
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts/{id}",
+                        999L, 999L)
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(containsString("해당 테니스장 또는 코트를 찾을 수 없습니다.")));
+    }
+
 
     @Test
     @DisplayName("코트 수정 성공")
@@ -176,12 +257,12 @@ class CourtControllerTest {
         // when
         ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", tennisCourtId, savedCourt.id())
                 .content("""
-                    {
-                      "courtCode": "B",
-                      "surfaceType": "CLAY",
-                      "environment": "INDOOR"
-                    }
-                    """.stripIndent())
+                        {
+                          "courtCode": "B",
+                          "surfaceType": "CLAY",
+                          "environment": "INDOOR"
+                        }
+                        """.stripIndent())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + adminAccessToken)
         ).andDo(print());
@@ -200,12 +281,12 @@ class CourtControllerTest {
         // when
         ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", tennisCourtId, 1L)
                 .content("""
-                    {
-                      "courtCode": "",
-                      "surfaceType": "",
-                      "environment": ""
-                    }
-                    """.stripIndent())
+                        {
+                          "courtCode": "",
+                          "surfaceType": "",
+                          "environment": ""
+                        }
+                        """.stripIndent())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + adminAccessToken)
         ).andDo(print());
@@ -224,12 +305,12 @@ class CourtControllerTest {
         // when
         ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", 999L, 1L)
                 .content("""
-                    {
-                      "courtCode": "B",
-                      "surfaceType": "HARD",
-                      "environment": "OUTDOOR"
-                    }
-                    """.stripIndent())
+                        {
+                          "courtCode": "B",
+                          "surfaceType": "HARD",
+                          "environment": "OUTDOOR"
+                        }
+                        """.stripIndent())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + adminAccessToken)
         ).andDo(print());
@@ -246,12 +327,12 @@ class CourtControllerTest {
         // when
         ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{id}", tennisCourtId, 9999L)
                 .content("""
-                    {
-                      "courtCode": "C",
-                      "surfaceType": "CLAY",
-                      "environment": "INDOOR"
-                    }
-                    """.stripIndent())
+                        {
+                          "courtCode": "C",
+                          "surfaceType": "CLAY",
+                          "environment": "INDOOR"
+                        }
+                        """.stripIndent())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + adminAccessToken)
         ).andDo(print());
@@ -260,6 +341,43 @@ class CourtControllerTest {
         result
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", containsString("해당 테니스장 또는 코트를 찾을 수 없습니다.")));
+    }
+
+    @Test
+    @DisplayName("코트 삭제 성공 - 어드민")
+    void delete1() throws Exception {
+        // given
+        CourtResponse savedCourt = courtService.createCourt(
+                new CourtReqForm("A", "HARD", "OUTDOOR"),
+                tennisCourtId
+        );
+
+        // when
+        ResultActions result = mvc.perform(delete("/api/tennis-courts/{tennisCourtId}/courts/{id}",
+                        tennisCourtId, savedCourt.id())
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-7"))
+                .andExpect(jsonPath("$.message").value(containsString("양평누리 테니스장 의 A 코트를 삭제하였습니다.")));
+    }
+
+    @Test
+    @DisplayName("코트 삭제 실패 - 존재하지 않는 테니스장 or 코트 ID")
+    void delete2() throws Exception {
+        // when
+        ResultActions result = mvc.perform(delete("/api/tennis-courts/{tennisCourtId}/courts/{id}",
+                        999L, 999L)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(containsString("해당 테니스장 또는 코트를 찾을 수 없습니다.")));
     }
 
 }
