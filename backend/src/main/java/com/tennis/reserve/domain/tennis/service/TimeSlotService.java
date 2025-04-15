@@ -18,13 +18,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
     private final CourtService courtService;
-    private final TennisCourtService tennisCourtService;
 
-    @Transactional
     public TimeSlotResponse createTimeSlot(TimeSlotReqForm timeSlotReqForm, Long courtId) {
 
         // 검증 -> 해당 코트에 이미 겹치는 시간대가 등록되어있는지
@@ -62,6 +61,7 @@ public class TimeSlotService {
         return court;
     }
 
+    @Transactional(readOnly = true)
     public TimeSlotListResponse getTimeSlotList(Long tennisCourtId, Long courtId) {
         // TennisCourtId와 CourtId를 통해 timeSlot 목록을 조회하고, TimeSlotItem DTO로 변경
         List<TimeSlotItem> timeSlotItems = timeSlotRepository.findByCourt_TennisCourt_IdAndCourt_Id(tennisCourtId, courtId)
@@ -73,10 +73,12 @@ public class TimeSlotService {
         return TimeSlotListResponse.of(tennisCourtId, courtId, court.courtCode(), court.tennisCourtName(), timeSlotItems);
     }
 
+    @Transactional(readOnly = true)
     public TimeSlotResponse getTimeSlot(Long tennisCourtId, Long courtId, Long id) {
         TimeSlot timeSlot = timeSlotRepository.findByCourt_TennisCourt_IdAndCourt_IdAndId(tennisCourtId, courtId, id)
                 .orElseThrow(() -> new ServiceException("404-2", "해당 시간대를 찾을 수 없습니다."));
 
         return TimeSlotResponse.fromEntity(timeSlot);
     }
+
 }

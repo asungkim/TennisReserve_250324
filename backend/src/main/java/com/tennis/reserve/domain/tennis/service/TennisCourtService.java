@@ -15,11 +15,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TennisCourtService {
 
     private final TennisCourtRepository tennisCourtRepository;
 
-    @Transactional
     public TennisCourtResponse createTennisCourt(TennisCourtReqForm tennisCourtReqForm) {
 
         validateTennisCourtName(tennisCourtReqForm.name());
@@ -50,6 +50,7 @@ public class TennisCourtService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<TennisCourtResponse> getTennisCourts() {
         return tennisCourtRepository.findAll()
                 .stream()
@@ -57,6 +58,7 @@ public class TennisCourtService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public TennisCourtResponse getTennisCourt(Long id) {
         return tennisCourtRepository.findById(id)
                 .map(TennisCourtResponse::fromEntity)
@@ -65,7 +67,6 @@ public class TennisCourtService {
                 );
     }
 
-    @Transactional
     public TennisCourtItem modifyTennisCourt(TennisCourtModifyReqForm modifyReqForm, Long id) {
         TennisCourt tennisCourt = tennisCourtRepository.findById(id)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 테니스장입니다."));
@@ -75,7 +76,6 @@ public class TennisCourtService {
         return TennisCourtItem.fromEntity(tennisCourt);
     }
 
-    @Transactional
     public void deleteTennisCourt(Long id) {
         TennisCourt tennisCourt = tennisCourtRepository.findById(id)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 테니스장입니다."));

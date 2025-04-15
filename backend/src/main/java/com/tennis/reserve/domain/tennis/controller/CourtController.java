@@ -9,7 +9,6 @@ import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,7 +34,6 @@ public class CourtController {
     }
 
     @GetMapping
-    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('USER')")
     public RsData<CourtListResponse> getCourts(@PathVariable Long tennisCourtId) {
         CourtListResponse courtResWithList = courtService.getCourts(tennisCourtId);
@@ -49,7 +47,6 @@ public class CourtController {
     }
 
     @GetMapping("/{id}")
-    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('USER')")
     public RsData<CourtResponse> getCourt(
             @PathVariable Long tennisCourtId,

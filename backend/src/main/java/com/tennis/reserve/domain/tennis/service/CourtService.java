@@ -22,14 +22,12 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CourtService {
 
     private final CourtRepository courtRepository;
     private final TennisCourtService tennisCourtService;
 
-    // TODO : 코트 등록, 수정, 삭제
-
-    @Transactional
     public CourtResponse createCourt(CourtReqForm courtReqForm, Long tennisCourtId) {
 
         // 검증 -> 해당 테니스장의 이미 같은 courtCode가 있는지 검증
@@ -79,6 +77,7 @@ public class CourtService {
         );
     }
 
+    @Transactional(readOnly = true)
     public CourtListResponse getCourts(Long tennisCourtId) {
         List<Court> courts = courtRepository.findByTennisCourtId(tennisCourtId);
 
@@ -88,6 +87,7 @@ public class CourtService {
         return CourtListResponse.of(tennisCourtId,tennisCourtRes.name(),courtItemRes);
     }
 
+    @Transactional(readOnly = true)
     public CourtResponse getCourt(Long tennisCourtId, Long id) {
         Court court = courtRepository.findByTennisCourtIdAndId(tennisCourtId, id).orElseThrow(
                 () -> new ServiceException("404-1", "해당 테니스장 또는 코트를 찾을 수 없습니다.")
@@ -96,7 +96,6 @@ public class CourtService {
         return CourtResponse.fromEntity(court);
     }
 
-    @Transactional
     public CourtResponse modifyCourt(
             CourtModifyReqForm modifyReqForm,
             Long tennisCourtId,
@@ -122,7 +121,6 @@ public class CourtService {
         return CourtResponse.fromEntity(court);
     }
 
-    @Transactional
     public String deleteCourt(Long tennisCourtId, Long id) {
         Court court = courtRepository.findByTennisCourtIdAndId(tennisCourtId, id).orElseThrow(
                 () -> new ServiceException("404-1", "해당 테니스장 또는 코트를 찾을 수 없습니다.")

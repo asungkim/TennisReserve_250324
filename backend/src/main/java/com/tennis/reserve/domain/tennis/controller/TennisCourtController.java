@@ -2,14 +2,13 @@ package com.tennis.reserve.domain.tennis.controller;
 
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtResponse;
 import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtItem;
+import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtResponse;
 import com.tennis.reserve.domain.tennis.service.TennisCourtService;
 import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +33,6 @@ public class TennisCourtController {
     }
 
     @GetMapping
-    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('USER')")
     public RsData<List<TennisCourtResponse>> getTennisCourts() {
         List<TennisCourtResponse> tennisCourtList = tennisCourtService.getTennisCourts();
@@ -47,7 +45,6 @@ public class TennisCourtController {
     }
 
     @GetMapping("/{id}")
-    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('USER')")
     public RsData<TennisCourtResponse> getTennisCourt(@PathVariable Long id) {
         TennisCourtResponse tennisCourtResponse = tennisCourtService.getTennisCourt(id);

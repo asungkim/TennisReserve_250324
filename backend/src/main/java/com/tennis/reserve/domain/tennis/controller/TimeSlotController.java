@@ -8,7 +8,6 @@ import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,7 +35,6 @@ public class TimeSlotController {
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    @Transactional(readOnly = true)
     public RsData<TimeSlotListResponse> getTimeSlotList(
             @PathVariable Long tennisCourtId,
             @PathVariable Long courtId
@@ -53,7 +51,6 @@ public class TimeSlotController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    @Transactional(readOnly = true)
     public RsData<TimeSlotResponse> getTimeSlot(
             @PathVariable Long tennisCourtId,
             @PathVariable Long courtId,
@@ -68,4 +65,22 @@ public class TimeSlotController {
                 res
         );
     }
+
+//    @PutMapping("/{id}")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public RsData<TimeSlotResponse> modifyTimeSlot(
+//            @PathVariable Long tennisCourtId,
+//            @PathVariable Long courtId,
+//            @PathVariable Long id,
+//            @RequestBody @Valid TimeSlotModifyReqForm modifyReqForm
+//            ) {
+//        TimeSlotResponse res = timeSlotService.modifyTimeSlot(tennisCourtId, courtId, id, modifyReqForm);
+//
+//        return new RsData<>(
+//                "200-6",
+//                "%s 의 %s 코트의 %s ~ %s 시간대를 수정하였습니다."
+//                        .formatted(res.tennisCourtName(), res.courtCode(), res.startTime(), res.endTime()),
+//                res
+//        );
+//    }
 }
