@@ -84,4 +84,24 @@ class TimeSlotServiceTest {
         assertThat(timeSlotRes.courtId()).isEqualTo(courtId);
     }
 
+
+    @Test
+    @DisplayName("시간대 단건 조회")
+    void getTimeSlot() {
+        // given
+        LocalTime start = LocalTime.of(9, 0, 0);
+        LocalTime end = LocalTime.of(10, 0, 0);
+        TimeSlotReqForm timeSlotReqForm = new TimeSlotReqForm(start, end);
+        TimeSlotResponse created = timeSlotService.createTimeSlot(timeSlotReqForm, courtId);
+
+        // when
+        TimeSlotResponse found = timeSlotService.getTimeSlot(tennisCourtId, courtId, created.id());
+
+        // then
+        assertThat(found.id()).isEqualTo(created.id());
+        assertThat(found.startTime()).isEqualTo(start);
+        assertThat(found.endTime()).isEqualTo(end);
+        assertThat(found.tennisCourtName()).isEqualTo("양평누리 테니스장");
+        assertThat(found.courtCode()).isEqualTo("A");
+    }
 }

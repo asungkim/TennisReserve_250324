@@ -34,8 +34,6 @@ public class TimeSlotController {
         );
     }
 
-    // TODO : 목록 조회, 단건 조회, 수정, 삭제
-
     @GetMapping
     @PreAuthorize("hasRole('USER')")
     @Transactional(readOnly = true)
@@ -49,6 +47,24 @@ public class TimeSlotController {
                 "200-4",
                 "%s 의 %s 코트에 시간대 목록을 조회하였습니다."
                         .formatted(res.tennisCourtName(), res.courtCode()),
+                res
+        );
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
+    @Transactional(readOnly = true)
+    public RsData<TimeSlotResponse> getTimeSlot(
+            @PathVariable Long tennisCourtId,
+            @PathVariable Long courtId,
+            @PathVariable Long id
+    ) {
+        TimeSlotResponse res = timeSlotService.getTimeSlot(tennisCourtId, courtId, id);
+
+        return new RsData<>(
+                "200-5",
+                "%s 의 %s 코트에 %s ~ %s 시간대를 조회하였습니다."
+                        .formatted(res.tennisCourtName(), res.courtCode(), res.startTime(), res.endTime()),
                 res
         );
     }

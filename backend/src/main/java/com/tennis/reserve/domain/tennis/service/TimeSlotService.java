@@ -72,4 +72,11 @@ public class TimeSlotService {
 
         return TimeSlotListResponse.of(tennisCourtId, courtId, court.courtCode(), court.tennisCourtName(), timeSlotItems);
     }
+
+    public TimeSlotResponse getTimeSlot(Long tennisCourtId, Long courtId, Long id) {
+        TimeSlot timeSlot = timeSlotRepository.findByCourt_TennisCourt_IdAndCourt_IdAndId(tennisCourtId, courtId, id)
+                .orElseThrow(() -> new ServiceException("404-2", "해당 시간대를 찾을 수 없습니다."));
+
+        return TimeSlotResponse.fromEntity(timeSlot);
+    }
 }

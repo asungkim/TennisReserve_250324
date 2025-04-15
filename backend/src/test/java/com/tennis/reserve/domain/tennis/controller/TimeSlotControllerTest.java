@@ -219,4 +219,52 @@ class TimeSlotControllerTest {
                 .andExpect(jsonPath("$.code").value("404-1"))
                 .andExpect(jsonPath("$.message").value("해당 테니스장 또는 코트를 찾을 수 없습니다."));
     }
+
+    @Test
+    @DisplayName("시간대 단건 조회 성공 - 유저")
+    void getOne1() throws Exception {
+        // given
+        String start = "10:00:00";
+        String end = "12:00:00";
+        ResultActions timeSlotRequest = createTimeSlotRequest(start, end, adminAccessToken);
+
+        // 추출된 ID를 따로 관리하지 않는다면 그냥 1L로 가정 (test 환경에서 첫 ID)
+        Long timeSlotId = 1L;
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}",
+                        tennisCourtId, courtId, timeSlotId)
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TimeSlotController.class))
+                .andExpect(handler().methodName("getTimeSlot"))
+                .andExpect(jsonPath("$.code").value("200-5"))
+                .andExpect(jsonPath("$.message").value("양평누리 테니스장 의 A 코트에 10:00 ~ 12:00 시간대를 조회하였습니다."))
+                .andExpect(jsonPath("$.data.tennisCourtName").value("양평누리 테니스장"))
+                .andExpect(jsonPath("$.data.courtCode").value("A"))
+                .andExpect(jsonPath("$.data.startTime").value("10:00:00"))
+                .andExpect(jsonPath("$.data.endTime").value("12:00:00"));
+    }
+
+    @Test
+    @DisplayName("시간대 단건 조회 실패 - 존재하지 않는 시간대 ID")
+    void getOne2() throws Exception {
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}",
+                        tennisCourtId, courtId, 9999L)
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404-2"))
+                .andExpect(jsonPath("$.message").value("해당 시간대를 찾을 수 없습니다."));
+    }
 }
