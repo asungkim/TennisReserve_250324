@@ -1,5 +1,6 @@
-package com.tennis.reserve.domain.tennis.dto.response;
+package com.tennis.reserve.domain.tennis.dto.response.tennisCourt;
 
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtItem;
 import com.tennis.reserve.domain.tennis.entity.TennisCourt;
 import lombok.Builder;
 
@@ -11,7 +12,7 @@ public record TennisCourtResponse(
         String name,
         String location,
         String imageUrl,
-        List<CourtResponse> courts
+        List<CourtItem> courts
 ) {
     public static TennisCourtResponse fromEntity(TennisCourt tennisCourt) {
         return TennisCourtResponse.builder()
@@ -21,7 +22,7 @@ public record TennisCourtResponse(
                 .imageUrl(tennisCourt.getImageUrl())
                 .courts(tennisCourt.getCourts()
                         .stream()
-                        .map(CourtResponse::fromEntity)
+                        .map(CourtItem::fromEntity)
                         .toList())
                 .build();
     }

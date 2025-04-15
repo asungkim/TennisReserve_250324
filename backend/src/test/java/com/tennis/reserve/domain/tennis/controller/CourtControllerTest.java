@@ -9,7 +9,7 @@ import com.tennis.reserve.domain.member.repository.MemberRepository;
 import com.tennis.reserve.domain.member.service.MemberService;
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtResponse;
 import com.tennis.reserve.domain.tennis.service.CourtService;
 import com.tennis.reserve.domain.tennis.service.TennisCourtService;
 import org.junit.jupiter.api.BeforeEach;
@@ -160,6 +160,9 @@ class CourtControllerTest {
 
 
     }
+
+
+    // TODO : 코트 목록 조회, 단건 조회, 삭제
 
     @Test
     @DisplayName("코트 수정 성공")

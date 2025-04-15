@@ -3,7 +3,7 @@ package com.tennis.reserve.domain.tennis.service;
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.TimeSlotResponse;
+import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

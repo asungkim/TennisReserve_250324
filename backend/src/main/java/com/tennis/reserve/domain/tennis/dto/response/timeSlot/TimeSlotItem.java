@@ -1,4 +1,4 @@
-package com.tennis.reserve.domain.tennis.dto.response;
+package com.tennis.reserve.domain.tennis.dto.response.timeSlot;
 
 import com.tennis.reserve.domain.tennis.entity.TimeSlot;
 import com.tennis.reserve.domain.tennis.enums.TimeSlotStatus;
@@ -7,22 +7,18 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record TimeSlotResponse(
+public record TimeSlotItem(
         Long id,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        TimeSlotStatus status,
-        String tennisCourtName,
-        String courtCode
+        TimeSlotStatus status
 ) {
-    public static TimeSlotResponse fromEntity(TimeSlot timeSlot) {
-        return TimeSlotResponse.builder()
+    public static TimeSlotItem fromEntity(TimeSlot timeSlot) {
+        return TimeSlotItem.builder()
                 .id(timeSlot.getId())
                 .startTime(timeSlot.getStartTime().withMinute(0).withSecond(0).withNano(0))
                 .endTime(timeSlot.getEndTime().withMinute(0).withSecond(0).withNano(0))
                 .status(timeSlot.getStatus())
-                .tennisCourtName(timeSlot.getCourt().getTennisCourt().getName())
-                .courtCode(timeSlot.getCourt().getCourtCode())
                 .build();
     }
 }

@@ -2,7 +2,8 @@ package com.tennis.reserve.domain.tennis.controller;
 
 import com.tennis.reserve.domain.tennis.dto.request.CourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtListResponse;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtResponse;
 import com.tennis.reserve.domain.tennis.service.CourtService;
 import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;
@@ -10,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,7 +28,8 @@ public class CourtController {
 
         return new RsData<>(
                 "200-3",
-                "코트가 등록되었습니다",
+                "%s의 %s 코트가 등록되었습니다"
+                        .formatted(courtResponse.tennisCourtName(),courtResponse.courtCode()),
                 courtResponse
         );
     }
@@ -37,13 +37,14 @@ public class CourtController {
     @GetMapping
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('USER')")
-    public RsData<List<CourtResponse>> getCourts(@PathVariable Long tennisCourtId) {
-        List<CourtResponse> courtList = courtService.getCourts(tennisCourtId);
+    public RsData<CourtListResponse> getCourts(@PathVariable Long tennisCourtId) {
+        CourtListResponse courtResWithList = courtService.getCourts(tennisCourtId);
 
         return new RsData<>(
                 "200-4",
-                "테니스장 목록을 조회하였습니다.",
-                courtList
+                "%s의 코트 목록을 조회하였습니다."
+                        .formatted(courtResWithList.tennisCourtName()),
+                courtResWithList
         );
     }
 

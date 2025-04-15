@@ -1,7 +1,7 @@
 package com.tennis.reserve.domain.tennis.service;
 
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.TimeSlotResponse;
+import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
 import com.tennis.reserve.domain.tennis.entity.Court;
 import com.tennis.reserve.domain.tennis.entity.TimeSlot;
 import com.tennis.reserve.domain.tennis.repository.TimeSlotRepository;

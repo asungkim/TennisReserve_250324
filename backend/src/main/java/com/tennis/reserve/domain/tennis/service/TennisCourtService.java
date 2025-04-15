@@ -2,8 +2,8 @@ package com.tennis.reserve.domain.tennis.service;
 
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.TennisCourtResponse;
-import com.tennis.reserve.domain.tennis.dto.response.TennisCourtSimpleResponse;
+import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtItem;
 import com.tennis.reserve.domain.tennis.entity.TennisCourt;
 import com.tennis.reserve.domain.tennis.repository.TennisCourtRepository;
 import com.tennis.reserve.global.exception.ServiceException;
@@ -66,13 +66,13 @@ public class TennisCourtService {
     }
 
     @Transactional
-    public TennisCourtSimpleResponse modifyTennisCourt(TennisCourtModifyReqForm modifyReqForm, Long id) {
+    public TennisCourtItem modifyTennisCourt(TennisCourtModifyReqForm modifyReqForm, Long id) {
         TennisCourt tennisCourt = tennisCourtRepository.findById(id)
                 .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 테니스장입니다."));
 
         tennisCourt.update(modifyReqForm.name(), modifyReqForm.location(), modifyReqForm.imageUrl());
 
-        return TennisCourtSimpleResponse.fromEntity(tennisCourt);
+        return TennisCourtItem.fromEntity(tennisCourt);
     }
 
     @Transactional

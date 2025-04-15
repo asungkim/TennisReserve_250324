@@ -1,7 +1,7 @@
 package com.tennis.reserve.domain.tennis.controller;
 
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.TimeSlotResponse;
+import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
 import com.tennis.reserve.domain.tennis.service.TimeSlotService;
 import com.tennis.reserve.global.dto.RsData;
 import jakarta.validation.Valid;

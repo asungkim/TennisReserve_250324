@@ -2,7 +2,10 @@ package com.tennis.reserve.domain.tennis.service;
 
 import com.tennis.reserve.domain.tennis.dto.request.CourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtItem;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtListResponse;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtResponse;
 import com.tennis.reserve.domain.tennis.entity.Court;
 import com.tennis.reserve.domain.tennis.entity.TennisCourt;
 import com.tennis.reserve.domain.tennis.enums.Environment;
@@ -76,12 +79,15 @@ public class CourtService {
         );
     }
 
-    public List<CourtResponse> getCourts(Long tennisCourtId) {
+    public CourtListResponse getCourts(Long tennisCourtId) {
         List<Court> courts = courtRepository.findByTennisCourtId(tennisCourtId).orElseThrow(
                 () -> new ServiceException("404-1", "해당 테니스장을 찾을 수 없습니다.")
         );
 
-        return courts.stream().map(CourtResponse::fromEntity).toList();
+        TennisCourtResponse tennisCourtRes = tennisCourtService.getTennisCourt(tennisCourtId);
+        List<CourtItem> courtItemRes = courts.stream().map(CourtItem::fromEntity).toList();
+
+        return CourtListResponse.of(tennisCourtId,tennisCourtRes.name(),courtItemRes);
     }
 
     public CourtResponse getCourt(Long tennisCourtId, Long id) {

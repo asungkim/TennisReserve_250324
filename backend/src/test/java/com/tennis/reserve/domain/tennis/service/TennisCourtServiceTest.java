@@ -2,8 +2,8 @@ package com.tennis.reserve.domain.tennis.service;
 
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.TennisCourtResponse;
-import com.tennis.reserve.domain.tennis.dto.response.TennisCourtSimpleResponse;
+import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.tennisCourt.TennisCourtItem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +95,7 @@ class TennisCourtServiceTest {
         // when 수정하면
         TennisCourtModifyReqForm modifyReqForm =
                 new TennisCourtModifyReqForm("목동 테니스장", "서울시 양천구", "http://modify.url");
-        TennisCourtSimpleResponse nextResponse = tennisCourtService.modifyTennisCourt(modifyReqForm, prevResponse.id());
+        TennisCourtItem nextResponse = tennisCourtService.modifyTennisCourt(modifyReqForm, prevResponse.id());
 
 
         // then

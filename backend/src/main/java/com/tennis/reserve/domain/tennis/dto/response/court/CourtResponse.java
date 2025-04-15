@@ -1,5 +1,6 @@
-package com.tennis.reserve.domain.tennis.dto.response;
+package com.tennis.reserve.domain.tennis.dto.response.court;
 
+import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
 import com.tennis.reserve.domain.tennis.entity.Court;
 import lombok.Builder;
 

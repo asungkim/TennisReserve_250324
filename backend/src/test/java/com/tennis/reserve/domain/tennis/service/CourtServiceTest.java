@@ -3,7 +3,8 @@ package com.tennis.reserve.domain.tennis.service;
 import com.tennis.reserve.domain.tennis.dto.request.CourtModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
-import com.tennis.reserve.domain.tennis.dto.response.CourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtListResponse;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtResponse;
 import com.tennis.reserve.global.exception.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -62,15 +61,15 @@ class CourtServiceTest {
         courtService.createCourt(new CourtReqForm("B", "CLAY", "INDOOR"), tennisCourtId);
 
         // when
-        List<CourtResponse> courts = courtService.getCourts(tennisCourtId);
+        CourtListResponse res = courtService.getCourts(tennisCourtId);
 
 
         // then
-        assertThat(courts).hasSize(2);
-        assertThat(courts).extracting("courtCode")
+        assertThat(res.courtList()).hasSize(2);
+        assertThat(res.courtList()).extracting("courtCode")
                 .containsExactlyInAnyOrder("A", "B");
-        assertThat(courts.get(0).tennisCourtId()).isEqualTo(tennisCourtId);
-        assertThat(courts.get(0).timeSlots()).isEmpty();
+        assertThat(res.tennisCourtId()).isEqualTo(tennisCourtId);
+        assertThat(res.tennisCourtName()).isEqualTo("양평누리 테니스장");
     }
 
     @Test
