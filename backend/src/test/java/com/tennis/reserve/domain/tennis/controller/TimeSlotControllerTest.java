@@ -1,5 +1,7 @@
 package com.tennis.reserve.domain.tennis.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tennis.reserve.domain.member.dto.request.JoinReqForm;
 import com.tennis.reserve.domain.member.dto.request.LoginReqForm;
 import com.tennis.reserve.domain.member.dto.response.LoginResBody;
@@ -23,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,9 @@ class TimeSlotControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
 
     @Autowired
@@ -97,6 +103,13 @@ class TimeSlotControllerTest {
                         .header("Authorization", "Bearer " + token)
                 )
                 .andDo(print());
+    }
+
+    private Long extractTimeSlotId(MvcResult result) throws Exception {
+        String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(content);
+        return root.path("data").path("id").asLong();
     }
 
     @Test
@@ -226,10 +239,9 @@ class TimeSlotControllerTest {
         // given
         String start = "10:00:00";
         String end = "12:00:00";
-        ResultActions timeSlotRequest = createTimeSlotRequest(start, end, adminAccessToken);
+        MvcResult timeSlotRequest = createTimeSlotRequest(start, end, adminAccessToken).andReturn();
 
-        // 추출된 ID를 따로 관리하지 않는다면 그냥 1L로 가정 (test 환경에서 첫 ID)
-        Long timeSlotId = 1L;
+        Long timeSlotId = extractTimeSlotId(timeSlotRequest);
 
         // when
         ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}",
@@ -267,4 +279,141 @@ class TimeSlotControllerTest {
                 .andExpect(jsonPath("$.code").value("404-2"))
                 .andExpect(jsonPath("$.message").value("해당 시간대를 찾을 수 없습니다."));
     }
+
+
+
+
+    @Test
+    @DisplayName("시간대 수정 성공 - status 포함")
+    void modify1() throws Exception {
+        // given: 시간대 등록
+        String start = "10:00:00";
+        String end = "12:00:00";
+
+        MvcResult result = createTimeSlotRequest(start, end, adminAccessToken)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Long timeSlotId = extractTimeSlotId(result);
+
+        // when: 시간대 수정 요청
+        ResultActions modifyResult = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}",
+                        tennisCourtId, courtId, timeSlotId)
+                        .content("""
+                                {
+                                    "startTime": "13:00:00",
+                                    "endTime": "15:00:00",
+                                    "status": "RESERVED"
+                                }
+                                """.stripIndent())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andDo(print());
+
+        // then
+        modifyResult
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-6"))
+                .andExpect(jsonPath("$.message").value("양평누리 테니스장 의 A 코트의 특정 시간대를 13:00 ~ 15:00 로 수정하였습니다."))
+                .andExpect(jsonPath("$.data.startTime").value("13:00:00"))
+                .andExpect(jsonPath("$.data.endTime").value("15:00:00"))
+                .andExpect(jsonPath("$.data.status").value("RESERVED"));
+    }
+
+    @Test
+    @DisplayName("시간대 수정 성공 - status 없이")
+    void modify2() throws Exception {
+        // given - 기존 시간대 등록
+        String start = "10:00:00";
+        String end = "12:00:00";
+        MvcResult result = createTimeSlotRequest(start, end, adminAccessToken).andReturn();
+
+        // 등록된 ID 가져오기
+        Long timeSlotId = extractTimeSlotId(result);
+
+        // when - status 없이 수정 요청
+        String newStart = "14:00:00";
+        String newEnd = "16:00:00";
+
+        ResultActions modifyResult = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}",
+                tennisCourtId, courtId, timeSlotId)
+                .content("""
+                        {
+                          "startTime": "%s",
+                          "endTime": "%s"
+                        }
+                        """.formatted(newStart, newEnd).stripIndent())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adminAccessToken)
+        ).andDo(print());
+
+        // then
+        modifyResult
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-6"))
+                .andExpect(jsonPath("$.data.startTime").value(newStart))
+                .andExpect(jsonPath("$.data.endTime").value(newEnd))
+                .andExpect(jsonPath("$.data.status").value("AVAILABLE")); // 기존 status 유지
+    }
+
+    @Test
+    @DisplayName("시간대 수정 실패 - 존재하지 않는 시간대 ID")
+    void modify3() throws Exception {
+        // given
+        String requestJson = """
+                    {
+                        "startTime": "13:00:00",
+                        "endTime": "15:00:00",
+                        "status": "AVAILABLE"
+                    }
+                """;
+
+        // when
+        ResultActions result = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}",
+                tennisCourtId, courtId, 9999L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .header("Authorization", "Bearer " + adminAccessToken)
+        ).andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404-2"))
+                .andExpect(jsonPath("$.message").value("해당 시간대를 찾을 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("시간대 수정 실패 - 유효하지 않은 status 값")
+    void modify4() throws Exception {
+        // given - 등록
+        String start = "10:00:00";
+        String end = "12:00:00";
+        MvcResult result = createTimeSlotRequest(start, end, adminAccessToken).andReturn();
+        Long timeSlotId = extractTimeSlotId(result); // 이건 아래에 helper 함수로 따로 설명
+
+        String invalidRequestJson = """
+                    {
+                        "startTime": "13:00:00",
+                        "endTime": "15:00:00",
+                        "status": "WRONG_STATUS"
+                    }
+                """;
+
+        // when
+        ResultActions res = mvc.perform(put("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots/{id}",
+                tennisCourtId, courtId, timeSlotId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidRequestJson)
+                .header("Authorization", "Bearer " + adminAccessToken)
+        ).andDo(print());
+
+        // then
+        res
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400-2"))
+                .andExpect(jsonPath("$.message").value("유효하지 않은 TimeStatus입니다. (입력값: WRONG_STATUS)"));
+    }
+
+
 }

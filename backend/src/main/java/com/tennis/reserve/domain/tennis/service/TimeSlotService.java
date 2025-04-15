@@ -1,5 +1,6 @@
 package com.tennis.reserve.domain.tennis.service;
 
+import com.tennis.reserve.domain.tennis.dto.request.TimeSlotModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.court.CourtResponse;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotItem;
@@ -7,8 +8,10 @@ import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotListRespon
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
 import com.tennis.reserve.domain.tennis.entity.Court;
 import com.tennis.reserve.domain.tennis.entity.TimeSlot;
+import com.tennis.reserve.domain.tennis.enums.TimeSlotStatus;
 import com.tennis.reserve.domain.tennis.repository.TimeSlotRepository;
 import com.tennis.reserve.global.exception.ServiceException;
+import com.tennis.reserve.global.standard.util.EnumConvertUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,4 +84,23 @@ public class TimeSlotService {
         return TimeSlotResponse.fromEntity(timeSlot);
     }
 
+    public TimeSlotResponse modifyTimeSlot(Long tennisCourtId, Long courtId, Long id, TimeSlotModifyReqForm modifyReqForm) {
+        TimeSlot timeSlot = timeSlotRepository.findByCourt_TennisCourt_IdAndCourt_IdAndId(tennisCourtId, courtId, id)
+                .orElseThrow(() -> new ServiceException("404-2", "해당 시간대를 찾을 수 없습니다."));
+
+
+        // status가 입력된 경우에만 변환
+        TimeSlotStatus status = timeSlot.getStatus(); // 기존값 유지
+        if (modifyReqForm.status() != null) {
+            status = EnumConvertUtil.convertOrThrow(
+                    modifyReqForm.status(),
+                    TimeSlotStatus.class,
+                    "유효하지 않은 TimeStatus입니다."
+            );
+        }
+
+        timeSlot.update(modifyReqForm.startTime(), modifyReqForm.endTime(), status);
+
+        return TimeSlotResponse.fromEntity(timeSlot);
+    }
 }

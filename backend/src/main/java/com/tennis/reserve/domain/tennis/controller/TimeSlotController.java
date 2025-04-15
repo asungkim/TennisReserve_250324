@@ -1,5 +1,6 @@
 package com.tennis.reserve.domain.tennis.controller;
 
+import com.tennis.reserve.domain.tennis.dto.request.TimeSlotModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotListResponse;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
@@ -66,21 +67,21 @@ public class TimeSlotController {
         );
     }
 
-//    @PutMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public RsData<TimeSlotResponse> modifyTimeSlot(
-//            @PathVariable Long tennisCourtId,
-//            @PathVariable Long courtId,
-//            @PathVariable Long id,
-//            @RequestBody @Valid TimeSlotModifyReqForm modifyReqForm
-//            ) {
-//        TimeSlotResponse res = timeSlotService.modifyTimeSlot(tennisCourtId, courtId, id, modifyReqForm);
-//
-//        return new RsData<>(
-//                "200-6",
-//                "%s 의 %s 코트의 %s ~ %s 시간대를 수정하였습니다."
-//                        .formatted(res.tennisCourtName(), res.courtCode(), res.startTime(), res.endTime()),
-//                res
-//        );
-//    }
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public RsData<TimeSlotResponse> modifyTimeSlot(
+            @PathVariable Long tennisCourtId,
+            @PathVariable Long courtId,
+            @PathVariable Long id,
+            @RequestBody @Valid TimeSlotModifyReqForm modifyReqForm
+    ) {
+        TimeSlotResponse res = timeSlotService.modifyTimeSlot(tennisCourtId, courtId, id, modifyReqForm);
+
+        return new RsData<>(
+                "200-6",
+                "%s 의 %s 코트의 특정 시간대를 %s ~ %s 로 수정하였습니다."
+                        .formatted(res.tennisCourtName(), res.courtCode(), res.startTime(), res.endTime()),
+                res
+        );
+    }
 }

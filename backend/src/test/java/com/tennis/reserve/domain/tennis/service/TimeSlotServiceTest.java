@@ -2,9 +2,11 @@ package com.tennis.reserve.domain.tennis.service;
 
 import com.tennis.reserve.domain.tennis.dto.request.CourtReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TennisCourtReqForm;
+import com.tennis.reserve.domain.tennis.dto.request.TimeSlotModifyReqForm;
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotListResponse;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
+import com.tennis.reserve.domain.tennis.enums.TimeSlotStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,5 +105,29 @@ class TimeSlotServiceTest {
         assertThat(found.endTime()).isEqualTo(end);
         assertThat(found.tennisCourtName()).isEqualTo("양평누리 테니스장");
         assertThat(found.courtCode()).isEqualTo("A");
+    }
+
+    @Test
+    @DisplayName("시간대 수정")
+    void modify() {
+        // given
+        LocalTime start = LocalTime.of(9, 0, 0);
+        LocalTime end = LocalTime.of(11, 0, 0);
+        TimeSlotReqForm timeSlotReqForm = new TimeSlotReqForm(start, end);
+        TimeSlotResponse created = timeSlotService.createTimeSlot(timeSlotReqForm, courtId);
+
+        // when
+        LocalTime newStart = LocalTime.of(13, 0, 0);
+        LocalTime newEnd = LocalTime.of(15, 0, 0);
+        TimeSlotModifyReqForm modifyReqForm = new TimeSlotModifyReqForm(newStart, newEnd, "RESERVED");
+        TimeSlotResponse modified = timeSlotService.modifyTimeSlot(tennisCourtId, courtId, created.id(), modifyReqForm);
+
+        // then
+        assertThat(created.startTime()).isEqualTo(start);
+        assertThat(created.endTime()).isEqualTo(end);
+        assertThat(created.status()).isEqualTo(TimeSlotStatus.AVAILABLE);
+        assertThat(modified.startTime()).isEqualTo(newStart);
+        assertThat(modified.endTime()).isEqualTo(newEnd);
+        assertThat(modified.status()).isEqualTo(TimeSlotStatus.RESERVED);
     }
 }

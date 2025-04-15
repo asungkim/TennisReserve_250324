@@ -29,4 +29,10 @@ public class TimeSlot extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @Setter
     private Court court;
+
+    public void update(LocalTime startTime, LocalTime endTime, TimeSlotStatus status) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+    }
 }
