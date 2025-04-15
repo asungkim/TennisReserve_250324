@@ -11,14 +11,18 @@ public record TimeSlotResponse(
         Long id,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        TimeSlotStatus status
+        TimeSlotStatus status,
+        String tennisCourtName,
+        String courtCode
 ) {
     public static TimeSlotResponse fromEntity(TimeSlot timeSlot) {
         return TimeSlotResponse.builder()
                 .id(timeSlot.getId())
-                .startTime(timeSlot.getStartTime())
-                .endTime(timeSlot.getEndTime())
+                .startTime(timeSlot.getStartTime().withMinute(0).withSecond(0).withNano(0))
+                .endTime(timeSlot.getEndTime().withMinute(0).withSecond(0).withNano(0))
                 .status(timeSlot.getStatus())
+                .tennisCourtName(timeSlot.getCourt().getTennisCourt().getName())
+                .courtCode(timeSlot.getCourt().getCourtCode())
                 .build();
     }
 }

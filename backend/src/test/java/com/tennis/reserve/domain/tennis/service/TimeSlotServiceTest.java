@@ -55,6 +55,8 @@ class TimeSlotServiceTest {
         // then
         assertThat(timeSlotResponse.startTime()).isEqualTo(start);
         assertThat(timeSlotResponse.endTime()).isEqualTo(end);
+        assertThat(timeSlotResponse.tennisCourtName()).isEqualTo("양평누리 테니스장");
+        assertThat(timeSlotResponse.courtCode()).isEqualTo("A");
     }
 
 }

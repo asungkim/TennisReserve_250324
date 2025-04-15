@@ -110,7 +110,7 @@ class CourtControllerTest {
         result
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-3"))
-                .andExpect(jsonPath("$.message").value("코트가 등록되었습니다"))
+                .andExpect(jsonPath("$.data.tennisCourtName").value("양평누리 테니스장"))
                 .andExpect(jsonPath("$.data.courtCode").value("A"));
 
     }

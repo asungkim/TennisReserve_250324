@@ -42,6 +42,7 @@ class TimeSlotControllerTest {
     @Autowired
     private MockMvc mvc;
 
+
     @Autowired
     private CourtService courtService;
 
@@ -80,7 +81,7 @@ class TimeSlotControllerTest {
         TennisCourtResponse tennisCourtResponse = tennisCourtService.createTennisCourt(new TennisCourtReqForm("서초구 테니스장", "서울 서초구", "http://image.url"));
         tennisCourtId = tennisCourtResponse.id();
 
-        CourtResponse courtResponse = courtService.createCourt(new CourtReqForm("A코트", "HARD", "OUTDOOR"), tennisCourtResponse.id());
+        CourtResponse courtResponse = courtService.createCourt(new CourtReqForm("A", "HARD", "OUTDOOR"), tennisCourtResponse.id());
         courtId = courtResponse.id();
     }
 
@@ -106,12 +107,14 @@ class TimeSlotControllerTest {
 
         ResultActions result = createTimeSlotRequest(start, end, adminAccessToken);
 
+
         result
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TimeSlotController.class))
                 .andExpect(handler().methodName("createTimeSlot"))
                 .andExpect(jsonPath("$.code").value("200-3"))
-                .andExpect(jsonPath("$.message").value("시간대가 등록되었습니다."))
+                .andExpect(jsonPath("$.data.tennisCourtName").value("서초구 테니스장"))
+                .andExpect(jsonPath("$.data.courtCode").value("A"))
                 .andExpect(jsonPath("$.data.startTime").value(start))
                 .andExpect(jsonPath("$.data.endTime").value(end));
     }

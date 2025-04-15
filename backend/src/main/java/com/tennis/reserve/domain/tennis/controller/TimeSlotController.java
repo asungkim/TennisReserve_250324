@@ -22,12 +22,25 @@ public class TimeSlotController {
             @PathVariable Long tennisCourtId,
             @PathVariable Long courtId,
             @RequestBody @Valid TimeSlotReqForm timeSlotReqForm) {
-        TimeSlotResponse timeSlotResponse = timeSlotService.createTimeSlot(timeSlotReqForm,courtId);
+        TimeSlotResponse res = timeSlotService.createTimeSlot(timeSlotReqForm, courtId);
 
         return new RsData<>(
                 "200-3",
-                "시간대가 등록되었습니다.",
-                timeSlotResponse
+                "%s 에 %s 코트에 %s ~ %s 시간대가 등록되었습니다."
+                        .formatted(res.tennisCourtName(),res.courtCode(),res.startTime(),res.endTime()),
+                res
         );
     }
+
+    // TODO : 목록 조회, 단건 조회, 수정, 삭제
+
+//    @GetMapping
+//    @PreAuthorize("hasRole('USER')")
+//    @Transactional(readOnly = true)
+//    public RsData<List<TimeSlotResponse>> getTimeSlotList(
+//            @PathVariable Long tennisCourtId,
+//            @PathVariable Long courtId
+//    ) {
+//        List<TimeSlotResponse> list = timeSlotService.getTimeSlotList(tennisCourtId, courtId);
+//    }
 }

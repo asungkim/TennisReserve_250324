@@ -57,7 +57,8 @@ public class CourtController {
 
         return new RsData<>(
                 "200-5",
-                "%s 를 조회하였습니다.".formatted(courtResponse.courtCode()),
+                "%s 의 %s 코트를 조회하였습니다."
+                        .formatted(courtResponse.tennisCourtName(), courtResponse.courtCode()),
                 courtResponse
         );
     }

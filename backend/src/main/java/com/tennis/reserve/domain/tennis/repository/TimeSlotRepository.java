@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
 
+//    Optional<List<TimeSlot>> findByTennisCourtIdAndCourtId(Long tennisCourtId, Long courtId);
 }
