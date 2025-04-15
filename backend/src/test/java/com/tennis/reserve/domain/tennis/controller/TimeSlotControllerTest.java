@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -159,4 +159,64 @@ class TimeSlotControllerTest {
                 .andExpect(jsonPath("$.message").value("겹치는 시간대가 이미 생성되어 있습니다."));
     }
 
+    @Test
+    @DisplayName("시간대 목록 조회 성공 - 유저")
+    void list1() throws Exception {
+        // given - 시간대 하나 등록
+        String start1 = "10:00:00";
+        String end1 = "12:00:00";
+        createTimeSlotRequest(start1, end1, adminAccessToken);
+
+        String start2 = "12:00:00";
+        String end2 = "14:00:00";
+        createTimeSlotRequest(start2, end2, adminAccessToken);
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots", tennisCourtId, courtId)
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TimeSlotController.class))
+                .andExpect(handler().methodName("getTimeSlotList"))
+                .andExpect(jsonPath("$.code").value("200-4"))
+                .andExpect(jsonPath("$.message").value("양평누리 테니스장 의 A 코트에 시간대 목록을 조회하였습니다."))
+                .andExpect(jsonPath("$.data.tennisCourtId").value(tennisCourtId))
+                .andExpect(jsonPath("$.data.courtId").value(courtId))
+                .andExpect(jsonPath("$.data.tennisCourtName").value("양평누리 테니스장"))
+                .andExpect(jsonPath("$.data.courtCode").value("A"))
+                .andExpect(jsonPath("$.data.timeSlots.length()").value(2))
+                .andExpect(jsonPath("$.data.timeSlots[0].startTime").value("10:00:00"))
+                .andExpect(jsonPath("$.data.timeSlots[0].endTime").value("12:00:00"))
+                .andExpect(jsonPath("$.data.timeSlots[1].startTime").value("12:00:00"))
+                .andExpect(jsonPath("$.data.timeSlots[1].endTime").value("14:00:00"));
+    }
+
+    @Test
+    @DisplayName("시간대 목록 조회 실패 - 존재하지 않는 테니스장 or 코트 ID")
+    void list2() throws Exception {
+        // given - 시간대 하나 등록
+        String start1 = "10:00:00";
+        String end1 = "12:00:00";
+        createTimeSlotRequest(start1, end1, adminAccessToken);
+
+        String start2 = "12:00:00";
+        String end2 = "14:00:00";
+        createTimeSlotRequest(start2, end2, adminAccessToken);
+
+        // when
+        ResultActions result = mvc.perform(get("/api/tennis-courts/{tennisCourtId}/courts/{courtId}/time-slots", 999L, 999L)
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        result
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404-1"))
+                .andExpect(jsonPath("$.message").value("해당 테니스장 또는 코트를 찾을 수 없습니다."));
+    }
 }

@@ -1,6 +1,9 @@
 package com.tennis.reserve.domain.tennis.service;
 
 import com.tennis.reserve.domain.tennis.dto.request.TimeSlotReqForm;
+import com.tennis.reserve.domain.tennis.dto.response.court.CourtResponse;
+import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotItem;
+import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotListResponse;
 import com.tennis.reserve.domain.tennis.dto.response.timeSlot.TimeSlotResponse;
 import com.tennis.reserve.domain.tennis.entity.Court;
 import com.tennis.reserve.domain.tennis.entity.TimeSlot;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
     private final CourtService courtService;
+    private final TennisCourtService tennisCourtService;
 
     @Transactional
     public TimeSlotResponse createTimeSlot(TimeSlotReqForm timeSlotReqForm, Long courtId) {
@@ -57,14 +62,14 @@ public class TimeSlotService {
         return court;
     }
 
-//    public List<TimeSlotResponse> getTimeSlotList(Long tennisCourtId, Long courtId) {
-//        List<TimeSlot> timeSlots = timeSlotRepository.findByTennisCourtIdAndCourtId(tennisCourtId, courtId)
-//                .orElseThrow(
-//                        () -> new ServiceException("404-1", "해당 테니스장의 해당 코트는 존재하지 않습니다.")
-//                );
-//
-//        return timeSlots.stream()
-//                .map(TimeSlotResponse::fromEntity)
-//                .toList();
-//    }
+    public TimeSlotListResponse getTimeSlotList(Long tennisCourtId, Long courtId) {
+        // TennisCourtId와 CourtId를 통해 timeSlot 목록을 조회하고, TimeSlotItem DTO로 변경
+        List<TimeSlotItem> timeSlotItems = timeSlotRepository.findByCourt_TennisCourt_IdAndCourt_Id(tennisCourtId, courtId)
+                .stream().map(TimeSlotItem::fromEntity).toList();
+
+        // 코트 정보를 가져옴
+        CourtResponse court = courtService.getCourt(tennisCourtId, courtId);
+
+        return TimeSlotListResponse.of(tennisCourtId, courtId, court.courtCode(), court.tennisCourtName(), timeSlotItems);
+    }
 }
