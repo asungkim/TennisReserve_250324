@@ -26,7 +26,7 @@ public class TimeSlotController {
 
         return new RsData<>(
                 "200-3",
-                "%s 에 %s 코트에 %s ~ %s 시간대가 등록되었습니다."
+                "%s 의 %s 코트에 %s ~ %s 시간대가 등록되었습니다."
                         .formatted(res.tennisCourtName(),res.courtCode(),res.startTime(),res.endTime()),
                 res
         );

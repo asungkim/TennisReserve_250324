@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -39,13 +39,13 @@ public class TimeSlotService {
 
     private Court validateDuplicateTimeSlot(TimeSlotReqForm timeSlotReqForm, Long courtId) {
         Court court = courtService.findById(courtId);
-        LocalDateTime newStart = timeSlotReqForm.startTime();
-        LocalDateTime newEnd = timeSlotReqForm.endTime();
+        LocalTime newStart = timeSlotReqForm.startTime();
+        LocalTime newEnd = timeSlotReqForm.endTime();
 
         boolean isOverlapped = court.getTimeSlots().stream()
                 .anyMatch(existingSlot -> {
-                    LocalDateTime existingStart = existingSlot.getStartTime();
-                    LocalDateTime existingEnd = existingSlot.getEndTime();
+                    LocalTime existingStart = existingSlot.getStartTime();
+                    LocalTime existingEnd = existingSlot.getEndTime();
 
                     return newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart);
                 });

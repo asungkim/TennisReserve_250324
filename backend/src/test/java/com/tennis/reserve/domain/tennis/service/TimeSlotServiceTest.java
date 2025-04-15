@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,19 +38,19 @@ class TimeSlotServiceTest {
                 "양평누리 테니스장", "서울시 영등포구", "http://test1.url"
         )).id();
 
-        courtId = courtService.createCourt(new CourtReqForm("A", "HARD", "OUTDOOR"),tennisCourtId).id();
+        courtId = courtService.createCourt(new CourtReqForm("A", "HARD", "OUTDOOR"), tennisCourtId).id();
     }
 
     @Test
     @DisplayName("시간대 등록")
     void create() {
         // given
-        LocalDateTime start = LocalDateTime.of(2025, 4, 1, 10, 0);
-        LocalDateTime end = LocalDateTime.of(2025, 4, 1, 12, 0);
+        LocalTime start = LocalTime.of(10, 0, 0);
+        LocalTime end = LocalTime.of(12, 0, 0);
         TimeSlotReqForm timeSlotReqForm = new TimeSlotReqForm(start, end);
 
         // when
-        TimeSlotResponse timeSlotResponse = timeSlotService.createTimeSlot(timeSlotReqForm,courtId);
+        TimeSlotResponse timeSlotResponse = timeSlotService.createTimeSlot(timeSlotReqForm, courtId);
 
         // then
         assertThat(timeSlotResponse.startTime()).isEqualTo(start);
